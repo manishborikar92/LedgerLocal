@@ -1,0 +1,51 @@
+{
+  "Landing, mobile (simulated slow 4G, 4x CPU)": {
+    "scores": {
+      "performance": 96,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 92
+    },
+    "FCP": "1.2\u00a0s",
+    "LCP": "2.5\u00a0s",
+    "TBT": "160\u00a0ms",
+    "CLS": "0"
+  },
+  "Landing, desktop": {
+    "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 92
+    },
+    "FCP": "0.4\u00a0s",
+    "LCP": "0.6\u00a0s",
+    "TBT": "20\u00a0ms",
+    "CLS": "0"
+  },
+  "App shell /app/, mobile": {
+    "scores": {
+      "performance": 91,
+      "accessibility": 100,
+      "best-practices": 100
+    },
+    "FCP": "0.8\u00a0s",
+    "LCP": "2.4\u00a0s",
+    "TBT": "310\u00a0ms",
+    "CLS": "0",
+    "note": "SEO audit omitted: the app shell is intentionally noindex."
+  },
+  "Guide page, mobile": {
+    "scores": {
+      "performance": 95,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 92
+    },
+    "FCP": "0.8\u00a0s",
+    "LCP": "2.2\u00a0s",
+    "TBT": "220\u00a0ms",
+    "CLS": "0"
+  },
+  "_note": "Lighthouse 12 on a single-core sandbox with Chromium 141 against the production build served with gzip. SEO is 92 because the robots.txt audit fetches /robots.txt from inside the page, which the strict CSP (connect-src none) blocks; robots.txt itself is verified separately."
+}

@@ -1,0 +1,11 @@
+{
+  "pages": 101,
+  "rows": 4300,
+  "truthRows": 4300,
+  "pdfKB": 282,
+  "extractMs": 2407,
+  "parseMs": 378,
+  "reconcileMs": 1,
+  "status": "reconciled",
+  "node": "v22.22.2"
+}

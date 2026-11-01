@@ -1,0 +1,53 @@
+# Research
+
+*Phase-0 research compiled 21–24 October 2026 with web search and measurements made while building; the production-quality audit research (Next.js, Vercel, SEO, performance, accessibility, design) is in [AUDIT.md](AUDIT.md). Every claim below is tagged **[verified]** (seen on a source named here), **[vendor claim]**, **[secondary]** (third-party article), or **[unverified]**. Nothing tagged [unverified] is used as a fact in the product or its copy.*
+
+## 1. What the research changed
+* The market already has local/offline converters and tools that check statements against printed balances. LedgerLocal therefore does **not** claim that reconciliation or local processing is unique. Its angle: processing that is *enforced* (strict CSP, tested), a clickable PDF-to-row audit trail, a row-by-row running-balance check, native QBO/OFX, and no page limits.
+* A previously cited "~83% accuracy for rule-based converters" figure could not be verified and is not used anywhere. All accuracy numbers are our own and labelled "on synthetic layouts".
+* The product is **client-side only**: no accounts, server or remote database.
+
+## 2. Landscape (features only)
+* **Cloud tools** (e.g. DocuClipper) export Excel, CSV, QBO, IIF, OFX, QFX and QIF and advertise an automatic reconciliation check ([feature page](https://www.docuclipper.com/pricing), [comparison page](https://www.docuclipper.com/comparisons/quickbooks-pdf-import-alternative/)) [vendor claims]. They upload files to their servers.
+* **Local / offline tools**: a Windows desktop converter with CSV/Excel/QBO export, OCR and "every row verified against printed balances" ([AlternativeTo](https://alternativeto.net/software/offline-bank-statement-converter/about/)) [listing/vendor claim]; browser-based tools that process locally but export CSV only ([Capterra listing](https://www.capterra.com/p/10049899/Bank-Converter/), [another](https://karlgusta.gumroad.com/l/yxufpx)) [listing/vendor claims].
+* **Complaints that shaped the design** (practitioner articles; Reddit threads could not be retrieved in this session) [secondary]: silently wrong signs and dropped rows ([DEV article](https://dev.to/christian_rousseau_c6a94f/how-to-convert-bank-statement-pdfs-to-csv-for-quickbooks-xero-2026-3kcl), [StatementDecoder](https://statementdecoder-web.onrender.com/blog/import-bank-statements-into-quickbooks)); DD/MM vs MM/DD mix-ups; balance mismatches; LLM "hallucinated" rows. → sign convention surfaced and checked by reconciliation; date order detected from evidence and disclosed; deterministic parser (no ML guessing).
+
+## 3. Real statement layouts
+From practitioner descriptions above and general knowledge of US/UK/EU/Indian statements [secondary / own knowledge, not a systematic survey]:
+* **Bank**: signed single "Amount" column; or separate Withdrawals/Deposits (Debit/Credit, Paid out/Paid in, Money out/in) columns; running "Balance" column on every line or only per day; "Balance brought forward / carried forward" rows (UK); a summary box (Beginning balance, Deposits, Withdrawals, Ending balance) that must not be mistaken for transactions; "Daily balance" tables with dates and balances only (decoys); multi-line descriptions; repeated headers and footers per page; table continuing across pages; dates without a year ("Dec 28") across a Dec→Jan period.
+* **Credit card**: Previous balance + purchases − payments = New balance; payments shown as negatives or with `CR`; two date columns (transaction/post); separate "Payments and credits" and "Purchases" sections each with their own header and total.
+* **Other formats**: parentheses negatives `(45.00)`, trailing minus `45.00-`, `CR`/`DR` suffixes, European `1.234,56` with `DD.MM.YYYY`, Indian lakh grouping `1,23,456.78` with `DD-MM-YYYY`.
+These shaped the 15 synthetic layouts in `tools/synth` (see DESIGN.md §9 and ACCURACY.md).
+
+## 4. OFX 1.x and Intuit Web Connect (.QBO)
+Sources: ProperSoft's [QBO format notes](https://www.propersoft.net/howto/qbo-format-web-connect-format/), [QuickBooks Desktop import guide](https://www.propersoft.net/import-qbo-quickbooks/), [DancingNumbers: "Unable to verify the financial institution"](https://www.dancingnumbers.com/unable-to-verify-the-financial-institution/), plus open-source OFX libraries and documentation consulted for field conventions. **Intuit's own Web Connect specification is behind a developer login and was not retrievable → [unverified] against the primary source.** What the writer implements and why:
+* QBO is an OFX file with an extra `INTU.BID` element inside `SONRS` identifying the financial institution [secondary]; plain OFX has none. QuickBooks Desktop can refuse files whose institution it cannot verify [secondary]. → `INTU.BID` (default `3000`, a generic placeholder; **not verified against Intuit's directory**) is user-configurable and the README documents the failure mode.
+* OFX 1.0.2 SGML: header lines (`OFXHEADER:100`, `DATA:OFXSGML`, `VERSION:102`, …), aggregates closed, leaf elements unclosed, ASCII text with `&`, `<`, `>` escaped. → implemented and **parsed back by the independent Python `ofxparse` library** in the test-suite.
+* Bank statements use `BANKMSGSRSV1/STMTTRNRS/STMTRS` with `BANKACCTFROM` (BANKID, ACCTID, ACCTTYPE); cards use `CREDITCARDMSGSRSV1/CCSTMTTRNRS/CCSTMTRS` with `CCACCTFROM`. Debits carry negative `TRNAMT`; for a card the ledger balance is the amount *owed* as a negative number.
+* `FITID` must be unique per account so importers can skip already-imported items; `NAME` ≤ 32 characters and `MEMO` ≤ 255 in OFX 1.x (field sizes from the OFX 1.x specification as commonly documented; not re-read from ofx.net in this session). → FITID = `LL` + 22 hex chars of SHA-256(account | date | amount | original description | repeat counter) = 24 characters; NAME truncated to 32 with the full text in MEMO.
+* Dates: `YYYYMMDD120000[0:GMT]` (noon GMT avoids time-zone date shifts).
+* **Not tested here**: importing into real QuickBooks Desktop/Online or Xero (no access). The README says so prominently.
+
+## 5. How QuickBooks and Xero take imports
+QuickBooks Desktop: Web Connect (`.qbo`) via File → Utilities → Import ([ProperSoft](https://help.propersoft.net/article/502-import-qbo-quickbooks)); QuickBooks Online: an upload-transactions flow accepting QBO/OFX/CSV ([DancingNumbers](https://www.dancingnumbers.com/import-bank-statements-into-quickbooks-online/)); Xero: import-a-statement accepting OFX/QIF/CSV, QBO per [ProperSoft](https://help.propersoft.net/article/487-import-file-xero) [secondary]. CSV import in both needs a specific column layout (date, amount or debit/credit, description) → the CSV exporter has configurable columns, date formats, signed vs debit/credit and decimal mark. Menu names change between versions; the README tells users to check vendors' current help.
+
+## 6. Stack versions and practices (npm registry, 21 Oct 2026)
+Next.js 16.4.2, React 19.3.1, Tailwind 4.3.3, pdfjs-dist 6.4.299, zod 4.6.7, Vitest 5.0.5, idb 8.0.4, @tanstack/react-virtual 3.14.21, fflate 0.8.3, @noble/hashes 2.4.0, pdfkit 0.20.2, Playwright (pinned 1.56 to match the installed Chromium 141). Deviations: **TypeScript 5.9.3** (TS 7 is the `latest` tag but a native rewrite whose compatibility with Next/typescript-eslint/Vitest was not established); **ESLint 9** (eslint-plugin-jsx-a11y does not yet declare ESLint 10 support).
+
+**pdf.js 6 — findings from running it (not from docs):**
+* The modern build calls `Map.prototype.getOrInsertComputed`, missing from Chromium 141 → page *rendering* failed. The **legacy build** carries polyfills → used for both rendering and the parse worker.
+* `isEvalSupported` no longer exists (no eval fallback path) — consistent with a [community note](https://github.com/wojtekmaj/react-pdf/discussions/1786) that the option is gone in 6.x.
+* Parsing in our own Web Worker works with pdf.js's in-thread "fake worker" (`globalThis.pdfjsWorker`), avoiding nested workers; main-thread rendering uses the self-hosted `pdfjs/pdf.worker.min.mjs`.
+* pdf.js emits blank spacer items (zero height) between text runs; the geometry layer drops them.
+* Standard-font and cMap files are fetched with `fetch` → blocked by `connect-src 'none'`; pdf.js falls back to system fonts. Visual fidelity of non-embedded fonts in the preview is lower, text extraction is unaffected. JPEG 2000/ICC (WASM) images do not render in the preview for the same reason.
+
+**Static export + strict CSP:** App Router static export cannot use per-request nonces ([guides consulted](https://dev.to/guydumais/how-to-deploy-a-strict-content-security-policy-csp-with-next-js-nfj), [another](https://dev.to/0xdbe/nextjs-crafting-a-strict-csp-49lg)); the robust option is **SHA-256 hashes of the inline bootstrap scripts, computed after the build** (`scripts/postbuild.mjs`) and injected as `<meta http-equiv="Content-Security-Policy">` plus a `_headers` file. Limits: `<meta>` cannot carry `frame-ancestors`; header form can. Measured pitfalls found by testing: (a) zod 4's JIT uses `new Function` → CSP violation until `z.config({ jitless: true })`; (b) a service worker inherits the CSP of its own script response, so `/sw.js` must **not** receive the document policy (it would block the precache fetches); (c) Turbopack's worker loader keeps its bootstrap config in the URL fragment, which a cache-served response cannot preserve → the production build uses **webpack**.
+
+**Service worker under static export:** hand-written precache of every file in `out/` (versioned by content hash), cache-first for same-origin GET. Verified in Chromium: reload with the network disabled still reconciles a statement.
+
+## 7. Accessibility for data grids
+W3C ARIA Authoring Practices [data-grid examples](https://www.w3.org/WAI/ARIA/apg/example-index/grid/dataGrids.html): `role=grid`, `row`, `columnheader`, `gridcell`, roving `tabindex`, arrow-key navigation, Enter/F2 to edit, Escape to cancel. For virtualised grids `aria-rowcount`/`aria-rowindex` carry the real positions. Implemented in `src/ui/Grid.tsx`; axe-core (WCAG 2.0/2.1/2.2 A/AA tags) runs in E2E on the landing page, the workbench in both themes and a phone viewport.
+
+
+## 8. Name check
+"LedgerLocal": no exact-match product found in a web search; the "Ledger*" namespace is crowded (Ledger CLI, Ledger Book, LedgerLite, the Ledger hardware-wallet company) ([Wikipedia: Ledger (software)](https://en.wikipedia.org/wiki/Ledger_(software))). This is **not a trademark clearance**; do a USPTO/WIPO/national registry search before investing in branding.

@@ -1,0 +1,26 @@
+@layer base {
+  html { background: var(--bg); scroll-padding-top: 72px; scroll-padding-bottom: 72px; -webkit-text-size-adjust: 100%; }
+  body { margin: 0; font-family: var(--font-ui); color: var(--text); background: var(--bg); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; font-feature-settings: "case" 0; }
+  h1, h2, h3, h4, .display { font-family: var(--font-ui); font-weight: 650; letter-spacing: -0.025em; line-height: 1.12; margin: 0; text-wrap: balance; }
+  p { text-wrap: pretty; }
+  a { color: var(--accent); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  a:hover { text-decoration-thickness: 2px; }
+  code, kbd, .mono { font-family: var(--font-mono); font-size: 0.88em; }
+  .num { font-variant-numeric: tabular-nums lining-nums; font-feature-settings: "tnum" 1; }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+  ::selection { background: var(--accent-soft); color: var(--text); }
+  ol, ul { margin: 0; }
+  /* Tailwind's reset removes list markers; restore them for plain content lists. */
+  main ol:not([class]), dialog ol:not([class]), .report ol:not([class]), .prose ol { list-style: decimal; padding-left: 1.25rem; }
+  main ul:not([class]), dialog ul:not([class]), .report ul:not([class]), .prose ul { list-style: disc; padding-left: 1.25rem; }
+  hr { border: 0; border-top: 1px solid var(--border); width: 100%; margin: 0; }
+  summary { cursor: pointer; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .skip { position: absolute; left: -999px; top: 8px; background: var(--accent); color: var(--accent-fg); padding: 8px 14px; z-index: 100; border-radius: var(--radius-sm); }
+  .skip:focus { left: 8px; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+  @media (forced-colors: active) {
+    .stamp, .chip, .btn, .card, .note { border: 1px solid CanvasText; }
+    .cellbox { outline: 2px solid Highlight; }
+  }
+}

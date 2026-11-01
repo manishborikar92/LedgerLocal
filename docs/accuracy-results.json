@@ -1,0 +1,228 @@
+{
+  "seeds": [
+    201,
+    202,
+    203,
+    204,
+    205,
+    206,
+    207,
+    208,
+    209,
+    210
+  ],
+  "layouts": [
+    {
+      "layout": "bank-signed",
+      "files": 10,
+      "truthRows": 296,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "bank-debit-credit",
+      "files": 10,
+      "truthRows": 304,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "bank-no-balance",
+      "files": 10,
+      "truthRows": 296,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "cc-two-date",
+      "files": 10,
+      "truthRows": 287,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "cc-crdr",
+      "files": 10,
+      "truthRows": 294,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "bank-parens",
+      "files": 10,
+      "truthRows": 292,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "bank-european",
+      "files": 10,
+      "truthRows": 292,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "bank-multiline",
+      "files": 10,
+      "truthRows": 393,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "bank-multipage",
+      "files": 10,
+      "truthRows": 861,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "bank-year-rollover",
+      "files": 10,
+      "truthRows": 285,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "bank-decoy",
+      "files": 10,
+      "truthRows": 280,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "bank-indian",
+      "files": 10,
+      "truthRows": 306,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "bank-trailing-minus",
+      "files": 10,
+      "truthRows": 308,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "bank-grouped-dates",
+      "files": 10,
+      "truthRows": 300,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "bank-uk-bf",
+      "files": 10,
+      "truthRows": 467,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "bank-password",
+      "files": 10,
+      "truthRows": 302,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "scan-image-only",
+      "files": 10,
+      "rejectedCorrectly": 10
+    },
+    {
+      "layout": "held-left-aligned",
+      "files": 10,
+      "truthRows": 294,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "held-money-in-out",
+      "files": 10,
+      "truthRows": 300,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "held-cc-negative",
+      "files": 10,
+      "truthRows": 289,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    },
+    {
+      "layout": "held-check-column",
+      "files": 10,
+      "truthRows": 271,
+      "rowRecall": 1,
+      "rowPrecision": 1,
+      "descriptionExact": 1,
+      "reconciled": 10,
+      "metadataAllCorrect": 10
+    }
+  ],
+  "overall": {
+    "rows": 6717,
+    "matched": 6717,
+    "parsed": 6717,
+    "reconciled": 200,
+    "statements": 200
+  }
+}

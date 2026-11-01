@@ -1,0 +1,24 @@
+# Decisions and deviations
+
+Format: **ID — decision** · reason.
+
+**D-01 — Client-side only.** No accounts, payments, licensing, trial limits, server, API origin or remote database: the app is a static site. The earlier paid-product mechanics (offline licence keys, trial counter, pricing page, "cloud mode") were removed in the v2 audit; so was the competitor price comparison.
+**D-02 — Static export, client-only workbench, deployed on Vercel (or any static host).** No API routes/server actions/middleware. `vercel.json` carries the static security headers; the post-build step emits an equivalent `_headers` for Cloudflare Pages/Netlify. The build fails if the export contains remote scripts/styles or inline event handlers.
+**D-03 — Production build uses `next build --webpack`.** Turbopack's worker loader keeps bootstrap config in the URL fragment, which service-worker-served responses drop, so the parse worker died for returning users (found by the offline E2E test).
+**D-04 — pdf.js: legacy build, pinned 6.4.299; parsing in our own Web Worker using pdf.js's in-thread worker; rendering with a self-hosted worker file.** The modern build needs `Map.getOrInsertComputed` (absent in Chromium 141). No `fetch` of fonts/cMaps (blocked by CSP) → system-font fallback in the preview.
+**D-05 — CSP by post-build SHA-256 hashes, as `<meta>` and `_headers`; `/sw.js` deliberately gets a *different* policy.** No `'unsafe-inline'`/`'unsafe-eval'` for scripts. A service worker inherits the CSP of its own script response, so the document policy would block its precache fetches. `frame-ancestors` cannot be set in `<meta>`, so `vercel.json` sends it as a header (multiple CSPs are all enforced).
+**D-06 — zod in `jitless` mode.** zod 4's JIT uses `new Function`, which the CSP forbids (found by the E2E violation listener).
+**D-07 — Custom ~150-line XLSX writer on `fflate` instead of a spreadsheet library.** Needs live formulas with cached values, tiny bundle, exact decimals. Verified with openpyxl and LibreOffice recalculation. **Not tested in Microsoft Excel.**
+**D-08 — Sign convention: inflow positive, outflow negative for banks *and* cards; balances stored as printed.** Matches OFX; reconciliation has one orientation switch.
+**D-09 — No silent corrections.** The only automatic fix is flipping all signs when that provably reconciles; it and the balance-pair search are recorded under "notes about how this file was read".
+**D-10 — Persistence is opt-in; a project is a client profile; PDFs stored only on request; wipe deletes everything.**
+**D-11 — Samples ship as a base64 module, not files.** `fetch` is blocked by `connect-src 'none'`.
+**D-12 — Evaluation protocol.** 11 layouts were tuned against; 4 *held-out* layouts were written afterwards. First run: 2/4 failed (lone "Posting Date" header; card statements printing charges negative). Both were fixed, so those layouts are no longer pristine; reported accuracy uses fresh seeds (201–210) and says so (ACCURACY.md).
+**D-13 — Tooling pins:** TypeScript 5.9.3 (not 7), ESLint 9 (jsx-a11y; `npm ci` prints an end-of-support notice), Playwright 1.56 (matches available Chromium), Tailwind 4, Vitest 5.
+**D-14 — Custom ARIA grid on TanStack Virtual** rather than a data-grid library: full control of roving tabindex, in-cell editing and PDF linkage; axe + keyboard E2E cover it.
+**D-15 — OFX 1.0.2 SGML (not 2.x XML); `INTU.BID` default 3000 and user-configurable; FITID = 24-char hash; NAME ≤ 32, MEMO ≤ 255; noon-GMT dates; deterministic output.** Real QuickBooks/Xero imports not tested.
+**D-16 — Design system: Geist + neutral tokens + one accent, Tailwind v4 with cascade layers.** Chosen from the evidence in AUDIT.md §2. Component class names must not collide with Tailwind utilities (`.grid`, `.grow` and `.container` did; renamed). Blur effects were removed after measurement (Lighthouse mobile 76 → 96).
+**D-17 — SEO/social:** `metadataBase` + `title.template`; file-convention OG/Twitter images (rendered from HTML by `tools/make-og.mjs`); pages that set their own `openGraph` repeat the image because Next replaces rather than merges it; `/app` is `noindex` (via meta, not a robots Disallow); `sitemap.ts`/`robots.ts` are `force-static`; JSON-LD `WebApplication`/`TechArticle`/`BreadcrumbList`.
+**D-18 — Performance:** pre-rendered app shell (real HTML first paint); workbench, secondary views, dialogs and the export engine load on demand; only the UI font is preloaded; the service worker is registered only from the app shell, after load and idle; the preview server gzips like a real host.
+**D-19 — MIT licence.** With no commercial licensing, a permissive licence maximises auditability of the privacy claims.
+**D-20 — Not built (roadmap):** offline OCR for scanned PDFs (needs tesseract.js + data + a WASM CSP allowance, verified on scanned samples), passphrase lock for saved projects, real-bank layout guides (bank-specific claims could not be verified).

@@ -1,0 +1,44 @@
+{
+  "/": {
+    "htmlKBgz": 10.5,
+    "jsKBgz": 169.1,
+    "cssKBgz": 8.7
+  },
+  "/app/": {
+    "htmlKBgz": 4.9,
+    "jsKBgz": 211.7,
+    "cssKBgz": 8.7
+  },
+  "/guides/": {
+    "htmlKBgz": 4.7,
+    "jsKBgz": 169.1,
+    "cssKBgz": 8.7
+  },
+  "largestChunks": [
+    {
+      "file": "930a69be.44259ba838a03c7b.js",
+      "KB": 1206,
+      "KBgz": 370
+    },
+    {
+      "file": "51fb665c.f94a644aeefefc6d.js",
+      "KB": 479,
+      "KBgz": 144
+    },
+    {
+      "file": "794-16b8a42d537e2b1f.js",
+      "KB": 237,
+      "KBgz": 66
+    },
+    {
+      "file": "framework-ea4f97ca039bd777.js",
+      "KB": 214,
+      "KBgz": 67
+    }
+  ],
+  "pdfWorker": {
+    "KB": 1290,
+    "KBgz": 383
+  },
+  "totalOutMB": 5.09
+}
