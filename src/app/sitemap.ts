@@ -2,8 +2,6 @@ import type { MetadataRoute } from 'next';
 import { absoluteUrl } from '@/config/site';
 import { GUIDES } from './guides/data';
 
-export const dynamic = 'force-static';
-
 export default function sitemap(): MetadataRoute.Sitemap {
   const built = new Date();
   return [

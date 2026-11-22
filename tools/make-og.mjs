@@ -4,12 +4,13 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
 const require = createRequire(import.meta.url);
 const { chromium } = require('playwright-core');
 
 const font = path.resolve('node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2');
 const html = `<!doctype html><meta charset="utf-8"><style>
-@font-face{font-family:Geist;src:url("file://${font}");font-weight:100 900}
+@font-face{font-family:Geist;src:url("${pathToFileURL(font).href}");font-weight:100 900}
 *{box-sizing:border-box;margin:0}
 body{width:1200px;height:630px;font-family:Geist,sans-serif;color:#0e1320;background:#f6f7f9;position:relative;overflow:hidden}
 .bg{position:absolute;inset:0;background:radial-gradient(60% 70% at 85% 0%,rgba(67,56,202,.16),transparent 70%),linear-gradient(#e1e5ec 1px,transparent 1px) 0 0/100% 42px;opacity:.7}
@@ -40,7 +41,7 @@ const tmp = path.join(os.tmpdir(), 'll-og.html');
 fs.writeFileSync(tmp, html);
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1200, height: 630 } });
-await page.goto(`file://${tmp}`);
+await page.goto(pathToFileURL(tmp).href);
 await page.evaluate(() => document.fonts.ready);
 await page.screenshot({ path: 'src/app/opengraph-image.png' });
 await browser.close();

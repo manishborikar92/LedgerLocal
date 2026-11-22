@@ -174,9 +174,20 @@ test('keyboard: arrows move the active cell, Space ticks, Ctrl+M merges, report 
   await expect(page.getByTestId('report')).toContainText('Not financial advice');
 });
 
-test('offline: after the first visit the installed app reloads and works with the network off', async ({ page, context }) => {
+test('offline: the installed app caches itself, then reloads and works with the network off', async ({ page, context }) => {
   await page.goto('/app/');
-  await page.evaluate(() => navigator.serviceWorker.ready.then(() => true));
+  await expect(page.getByTestId('offline-ready')).toBeVisible({ timeout: 45_000 }); // service worker installed and active
+  // "Ready offline" must mean it: Cache Storage (not merely the HTTP cache) holds every file the build can request,
+  // including the lazily loaded chunks, without the workbench ever having been used online.
+  const { files } = (await (await page.request.get('/_next/static/ll-precache.json')).json()) as { files: string[] };
+  expect(files.length).toBeGreaterThan(20);
+  const cached = await page.evaluate(async () => {
+    const urls: string[] = [];
+    for (const name of await caches.keys()) for (const r of await (await caches.open(name)).keys()) urls.push(new URL(r.url).pathname);
+    return urls;
+  });
+  expect(files.map((f) => `/_next/${f}`).filter((u) => !cached.includes(u))).toEqual([]);
+  expect(cached).toContain('/app/');
   await page.reload();
   await page.waitForFunction(() => !!navigator.serviceWorker.controller);
   await context.setOffline(true);

@@ -1,5 +1,7 @@
 import { withBase } from '@/config/paths';
-import { Logo } from '@/ui/primitives/icons';
+import { cycleTheme } from '@/server/actions';
+import { readTheme } from '@/server/preferences';
+import { Logo, Monitor, Moon, Sun } from '@/ui/primitives/icons';
 
 const NAV = [
   { href: '/#how', label: 'How it works' },
@@ -9,7 +11,8 @@ const NAV = [
   { href: '/guides/', label: 'Guides' },
 ];
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const theme = await readTheme();
   return (
     <header className="site-header">
       <div className="site-container">
@@ -18,7 +21,13 @@ export function SiteHeader() {
           <span className="hidden items-center gap-1 md:flex">
             {NAV.map((n) => <a key={n.href} href={withBase(n.href)}>{n.label}</a>)}
           </span>
-          <a className="btn btn-primary btn-sm ml-2" href={withBase('/app/')}>Open the app</a>
+          {/* Server Action form: works with JavaScript disabled. */}
+          <form action={cycleTheme} className="ml-1">
+            <button type="submit" className="btn btn-quiet btn-sm" aria-label={`Theme: ${theme}. Click to change`} title={`Theme: ${theme}`}>
+              {theme === 'light' ? <Sun /> : theme === 'dark' ? <Moon /> : <Monitor />}
+            </button>
+          </form>
+          <a className="btn btn-primary btn-sm ml-1" href={withBase('/app/')}>Open the app</a>
         </nav>
       </div>
     </header>

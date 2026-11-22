@@ -1,104 +1,40 @@
-import crypto from 'node:crypto';
-import fs from 'node:fs';
 import path from 'node:path';
 import { ESLint } from 'eslint';
 import { describe, expect, it } from 'vitest';
-// @ts-expect-error plain ESM script without types
-import { buildCsp } from '../../scripts/csp.mjs';
+import { buildCsp, isWorkbenchPath, makeNonce } from '@/lib/csp';
 
 describe('Content-Security-Policy builder', () => {
-  it('connect-src none, no unsafe-inline/eval for scripts, hashes sorted and unique', () => {
-    const csp: string = buildCsp({ scriptHashes: ['sha256-b', 'sha256-a', 'sha256-a'] });
+  const nonce = 'abc123==';
+  it('workbench policy: no network at all (connect-src and form-action none), nonce-only scripts', () => {
+    const csp = buildCsp({ nonce, workbench: true });
     expect(csp).toContain("connect-src 'none'");
-    expect(csp).toContain("script-src 'self' 'sha256-a' 'sha256-b'");
-    expect(csp).not.toMatch(/script-src[^;]*unsafe/);
+    expect(csp).toContain("form-action 'none'");
+    expect(csp).toContain(`script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`);
+    expect(csp).not.toMatch(/script-src[^;]*'unsafe-(inline|eval)'/);
     expect(csp).toContain("default-src 'none'");
+    expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("object-src 'none'");
-    expect(csp).not.toContain('frame-ancestors'); // not allowed in <meta>
-    expect(buildCsp({ forHeader: true })).toContain("frame-ancestors 'none'");
   });
-});
-
-const out = path.resolve('out');
-describe.skipIf(!fs.existsSync(path.join(out, 'app/index.html')))('built static export (run `npm run build` first)', () => {
-  const walk = (d: string): string[] => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
-  const htmls = fs.existsSync(out) ? walk(out).filter((f) => f.endsWith('.html')) : [];
-  it('every page carries a strict CSP and every inline script is covered by a hash', () => {
-    expect(htmls.length).toBeGreaterThanOrEqual(8);
-    for (const f of htmls) {
-      const html = fs.readFileSync(f, 'utf8');
-      const m = /<meta http-equiv="Content-Security-Policy" content="([^"]+)"/.exec(html);
-      expect(m, f).not.toBeNull();
-      const csp = m![1]!.replace(/&quot;/g, '"');
-      expect(csp, f).toContain("connect-src 'none'");
-      expect(csp, f).not.toMatch(/script-src[^;]*'unsafe-(inline|eval)'/);
-      for (const s of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)) {
-        if (/\bsrc=/.test(s[1]!) || /type="application\/(ld\+)?json"/.test(s[1]!) || !s[2]!.trim()) continue;
-        const h = 'sha256-' + crypto.createHash('sha256').update(s[2]!, 'utf8').digest('base64');
-        expect(csp, `${f}: inline script not hashed`).toContain(h);
-      }
-      expect(html, f).not.toMatch(/<(script|img|iframe)[^>]+src="https?:\/\//);
-      // resource-loading links must be same-origin (canonical/alternate legitimately carry absolute URLs)
-      for (const l of html.matchAll(/<link\b[^>]*>/g)) if (/rel="(stylesheet|preload|modulepreload|prefetch|preconnect|dns-prefetch|icon|manifest)/.test(l[0])) expect(l[0], f).not.toMatch(/href="(https?:)?\/\//);
-    }
+  it('other pages may talk to their own origin only (navigation payloads, Server Actions)', () => {
+    const csp = buildCsp({ nonce, workbench: false });
+    expect(csp).toContain("connect-src 'self'");
+    expect(csp).toContain("form-action 'self'");
+    expect(csp).not.toMatch(/connect-src[^;]*(https?:|\*)/);
   });
-  it('the service worker is not subject to the document CSP and has no leftover placeholders', () => {
-    const headers = fs.readFileSync(path.join(out, '_headers'), 'utf8');
-    const swBlock = headers.split('\n\n').find((b) => b.startsWith('/sw.js'))!;
-    expect(swBlock).toContain("connect-src 'self'");
-    const rules = headers.split('\n\n').filter((b) => b.includes('connect-src \'none\''));
-    expect(rules.some((b) => b.startsWith('/sw.js') || b.startsWith('/*'))).toBe(false);
-    const sw = fs.readFileSync(path.join(out, 'sw.js'), 'utf8');
-    expect(sw).not.toMatch(/__PRECACHE__|__VERSION__/);
-    expect(sw).toMatch(/const PRECACHE = \[/);
+  it('development relaxes only what React and HMR need', () => {
+    const csp = buildCsp({ nonce, workbench: true, dev: true });
+    expect(csp).toContain("'unsafe-eval'");
+    expect(csp).toContain('ws:');
+    expect(buildCsp({ nonce, workbench: true })).not.toContain('unsafe-eval');
   });
-  it('ships no third-party hosts: fonts, worker and wasm-free assets are all self-hosted', () => {
-    const js = walk(path.join(out, '_next')).filter((f) => f.endsWith('.js') || f.endsWith('.css'));
-    const bad: string[] = [];
-    for (const f of js) {
-      const t = fs.readFileSync(f, 'utf8');
-      for (const m of t.matchAll(/(?:src|href|url)\s*[=(:]\s*["']?(https?:\/\/(?!www\.w3\.org|react\.dev|nextjs\.org|schemas\.openxmlformats)[^"')\s]+)/g)) bad.push(`${path.basename(f)}: ${m[1]}`);
-    }
-    expect(bad).toEqual([]);
-    expect(fs.existsSync(path.join(out, 'pdfjs/pdf.worker.min.mjs'))).toBe(true);
+  it('nonces are random, base64 and unique per call', () => {
+    const set = new Set(Array.from({ length: 50 }, makeNonce));
+    expect(set.size).toBe(50);
+    expect([...set].every((n) => /^[A-Za-z0-9+/]+=*$/.test(n) && n.length >= 22)).toBe(true);
   });
-});
-
-describe.skipIf(!fs.existsSync(path.join(out, 'index.html')))('SEO and content guards on the built export', () => {
-  const read = (f: string) => fs.readFileSync(path.join(out, f), 'utf8');
-  const walk = (d: string): string[] => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
-  const pages = () => walk(out).filter((f) => f.endsWith('.html') && !/404|_not-found/.test(f));
-  it('every indexable page has one h1, a unique title, a sane description, canonical and social tags', () => {
-    const titles = new Set<string>();
-    for (const f of pages().filter((x) => !x.includes(`${path.sep}app${path.sep}`))) {
-      const h = fs.readFileSync(f, 'utf8');
-      expect(h.match(/<h1[ >]/g)?.length, f).toBe(1);
-      const title = /<title>(.*?)<\/title>/.exec(h)?.[1] ?? '';
-      expect(title.length, f).toBeGreaterThan(10);
-      titles.add(title);
-      const desc = /<meta name="description" content="([^"]*)"/.exec(h)?.[1] ?? '';
-      expect(desc.length, f).toBeGreaterThan(50);
-      expect(desc.length, f).toBeLessThanOrEqual(200);
-      for (const re of [/<link rel="canonical"/, /<meta property="og:title"/, /<meta property="og:image"/, /<meta name="twitter:card"/, /<meta name="viewport"/, /<html lang="en"/]) expect(h, `${f} ${re}`).toMatch(re);
-    }
-    expect(titles.size).toBe(pages().filter((x) => !x.includes(`${path.sep}app${path.sep}`)).length);
-  });
-  it('the app shell is noindex and the sitemap lists every guide', () => {
-    expect(read('app/index.html')).toMatch(/<meta name="robots" content="noindex/);
-    const sm = read('sitemap.xml');
-    expect((sm.match(/<loc>/g) ?? []).length).toBeGreaterThanOrEqual(6);
-    expect(sm).not.toContain('/app/');
-  });
-  it('social images exist with the documented 1200x630 size', () => {
-    for (const f of ['opengraph-image.png', 'twitter-image.png']) {
-      const b = fs.readFileSync(path.join(out, f));
-      expect(b.readUInt32BE(16)).toBe(1200);
-      expect(b.readUInt32BE(20)).toBe(630);
-    }
-  });
-  it('contains no pricing, payment, subscription, licence-key or backend vocabulary in any page', () => {
-    const bad = /\b(pricing|subscription|checkout|merchant of record|paddle|lemon squeezy|polar\.sh|licen[cs]e key|per year|per month|api origin|control plane|backend)\b/i;
-    for (const f of pages()) expect(fs.readFileSync(f, 'utf8').replace(/<script[\s\S]*?<\/script>/g, ''), f).not.toMatch(bad);
+  it('only /app is the workbench', () => {
+    for (const p of ['/app', '/app/']) expect(isWorkbenchPath(p)).toBe(true);
+    for (const p of ['/', '/guides/', '/application', '/api/health/']) expect(isWorkbenchPath(p)).toBe(false);
   });
 });
 

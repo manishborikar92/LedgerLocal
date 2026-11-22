@@ -31,7 +31,7 @@ test('100-page statement: parsed in a worker while the UI stays responsive; bund
     pages: big.truth.pageCount, rows: big.truth.rows.length, pdfKB: Math.round(big.file.buffer.length / 1024),
     workerParseToReconciledMs: parseMs, appLoadToInteractiveMs: loadMs,
     maxMainThreadFrameLatencyMsDuringParse: Math.max(0, ...lat), longTasksOver50ms: long.filter((d) => d > 50).length, maxLongTaskMs: Math.round(Math.max(0, ...long)),
-    browser: 'Chromium 141 (Playwright), 1 CPU sandbox',
+    browser: `Chromium ${page.context().browser()?.version() ?? 'unknown'} (Playwright), 1 CPU sandbox`,
   };
   fs.writeFileSync('docs/perf-browser.json', JSON.stringify(res, null, 2));
   console.log(res);

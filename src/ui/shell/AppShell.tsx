@@ -2,6 +2,7 @@
 import dynamic from 'next/dynamic';
 import { useEffect } from 'react';
 import { withBase } from '@/config/paths';
+import type { ThemePreference } from '@/lib/theme';
 import { EmptyState } from '@/ui/import/ImportPanel';
 import { Folder, Help, Logo, Monitor, Moon, Shield, Sun } from '@/ui/primitives/icons';
 import { loadSampleById, openDialog, setOnline, setView, store, useSel } from '@/ui/state';
@@ -15,14 +16,15 @@ const Dialogs = dynamic(() => import('@/ui/dialogs/Dialogs').then((m) => m.Dialo
 
 const VIEWS = [['work', 'Workbench'], ['ledger', 'Merged ledger'], ['rules', 'Payees & rules']] as const;
 
-export function AppShell() {
+export function AppShell({ initialTheme }: { initialTheme: ThemePreference }) {
   const hasDocs = useSel(store, (s) => s.docs.length > 0);
   const view = useSel(store, (s) => s.view);
   const online = useSel(store, (s) => s.online);
   const dialogOpen = useSel(store, (s) => s.dialog !== null);
   const projectName = useSel(store, (s) => s.project.name);
   const dirty = useSel(store, (s) => s.project.dirty);
-  const { mode, cycle } = useTheme();
+  const { mode, cycle } = useTheme(initialTheme);
+  const offlineReady = useSel(store, (s) => s.offlineReady);
 
   useEffect(() => {
     setOnline(navigator.onLine);
@@ -52,6 +54,7 @@ export function AppShell() {
         )}
         <div className="spacer" />
         {!online && <span className="chip chip-warning" role="status">Offline · everything still works</span>}
+        {online && offlineReady && <span className="chip hidden md:inline-flex" data-testid="offline-ready" title="The app and PDF engine are cached; it works without a connection">Ready offline</span>}
         <button className="chip chip-success" onClick={() => openDialog('privacy')} data-testid="privacy-chip" title="How to verify nothing is uploaded"><Shield /> 0 bytes uploaded</button>
         <button className="btn btn-sm btn-quiet" onClick={cycle} aria-label={`Theme: ${mode}. Click to change`} title={`Theme: ${mode}`}>{mode === 'light' ? <Sun /> : mode === 'dark' ? <Moon /> : <Monitor />}</button>
         <button className="btn btn-sm btn-quiet" onClick={() => openDialog('shortcuts')} aria-label="Help and keyboard shortcuts"><Help /></button>

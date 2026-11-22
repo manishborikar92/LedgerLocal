@@ -1,12 +1,12 @@
 {
   "name": "ledgerlocal",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "description": "Convert PDF bank and credit-card statements to QBO, OFX, XLSX and CSV entirely on your own device, with balance reconciliation.",
   "license": "MIT",
   "type": "module",
   "engines": {
-    "node": ">=20.9.0"
+    "node": ">=22.13.0"
   },
   "dependencies": {
     "@noble/hashes": "2.4.0",
@@ -14,16 +14,17 @@
     "fflate": "0.8.3",
     "geist": "1.8.2",
     "idb": "8.0.4",
-    "next": "16.4.2",
+    "next": "16.4.6",
     "pdfjs-dist": "6.4.299",
     "react": "19.3.1",
     "react-dom": "19.3.1",
+    "server-only": "0.0.1",
     "zod": "4.6.7"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
     "@eslint/js": "9.39.5",
-    "@playwright/test": "1.56.0",
+    "@playwright/test": "1.63.0",
     "@tailwindcss/postcss": "4.3.3",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",
@@ -46,17 +47,24 @@
     "vitest": "5.0.5"
   },
   "scripts": {
-    "dev": "node scripts/prebuild.mjs && next dev",
-    "build": "node scripts/prebuild.mjs && next build --webpack && node scripts/postbuild.mjs",
-    "preview": "node scripts/serve.mjs",
+    "predev": "node scripts/copy-pdfjs-worker.mjs",
+    "dev": "next dev --webpack",
+    "prebuild": "node scripts/copy-pdfjs-worker.mjs",
+    "build": "next build --webpack",
+    "start": "next start",
+    "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit -p .",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:e2e": "playwright test",
     "samples": "tsx tools/make-samples.ts",
     "synth": "tsx tools/synth/cli.ts .generated/synthetic 1",
     "accuracy": "tsx tools/accuracy.ts",
     "perf": "tsx tools/perf.ts",
     "check": "npm run typecheck && npm run lint && npm test && npm run build"
+  },
+  "overrides": {
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.1"
+    }
   }
 }

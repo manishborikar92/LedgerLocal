@@ -1,44 +1,44 @@
 {
-  "/": {
-    "htmlKBgz": 10.5,
-    "jsKBgz": 169.1,
-    "cssKBgz": 8.7
-  },
-  "/app/": {
-    "htmlKBgz": 4.9,
-    "jsKBgz": 211.7,
-    "cssKBgz": 8.7
-  },
-  "/guides/": {
-    "htmlKBgz": 4.7,
-    "jsKBgz": 169.1,
-    "cssKBgz": 8.7
-  },
-  "largestChunks": [
+  "note": "gzip level 9 sizes from the production build in .next; a host may compress slightly differently. First load = files referenced by the page HTML.",
+  "firstLoad": [
     {
-      "file": "930a69be.44259ba838a03c7b.js",
-      "KB": 1206,
-      "KBgz": 370
+      "route": "/",
+      "jsGzipKB": 168.7,
+      "cssGzipKB": 8.7,
+      "jsFiles": 5
     },
     {
-      "file": "51fb665c.f94a644aeefefc6d.js",
-      "KB": 479,
-      "KBgz": 144
+      "route": "/guides/verify-offline/",
+      "jsGzipKB": 168.7,
+      "cssGzipKB": 8.7,
+      "jsFiles": 5
     },
     {
-      "file": "794-16b8a42d537e2b1f.js",
-      "KB": 237,
-      "KBgz": 66
-    },
-    {
-      "file": "framework-ea4f97ca039bd777.js",
-      "KB": 214,
-      "KBgz": 67
+      "route": "/app/",
+      "jsGzipKB": 211.6,
+      "cssGzipKB": 8.7,
+      "jsFiles": 8
     }
   ],
-  "pdfWorker": {
-    "KB": 1290,
-    "KBgz": 383
+  "workbenchLazyJs": {
+    "files": 32,
+    "gzipKB": 706.4,
+    "largestGzipKB": [
+      370.5,
+      144,
+      67.1,
+      39.6
+    ]
   },
-  "totalOutMB": 5.09
+  "pdfjsWorkerFile": {
+    "rawKB": 1290.3,
+    "gzipKB": 383,
+    "note": "public/pdfjs/pdf.worker.min.mjs, loaded when a page is rendered"
+  },
+  "offlineInstall": {
+    "files": 44,
+    "rawKB": 4398,
+    "gzipKB": 1447.2,
+    "note": "every build file plus the pdf.js worker; icons and the manifest add a few KB"
+  }
 }

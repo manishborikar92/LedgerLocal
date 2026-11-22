@@ -5,6 +5,7 @@ import { newId, ProjectSchema, SCHEMA_VERSION, type Project } from '@/core/model
 import { download } from './exporting';
 import { fileStem } from '@/core/export/shared';
 import { activeDoc, freshProject, get, set } from './store';
+import { clearThemeCookie } from '@/lib/theme-cookie';
 import { notify } from './ui';
 import type { AppState, Doc } from './types';
 
@@ -66,6 +67,7 @@ export async function reattachPdf(file: File): Promise<void> {
 export async function wipeAll(): Promise<void> {
   await getServices().repo.wipe();
   for (const k of Object.keys(localStorage)) if (k.startsWith('ll.')) localStorage.removeItem(k);
+  clearThemeCookie();
   set((s) => ({ ...s, docs: [], activeDocId: null, focusRowId: null, checked: [], queue: [], project: freshProject(), dialog: null, view: 'work' }));
   notify('success', 'All saved projects, PDFs and preferences on this device were deleted.');
 }

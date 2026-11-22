@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
+import { connection } from 'next/server';
 import type { ReactNode } from 'react';
 import { absoluteUrl, SITE } from '@/config/site';
+import { readTheme } from '@/server/preferences';
 import { mono, sans } from './fonts';
 import './globals.css';
 
@@ -28,18 +30,13 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-// Runs before first paint so a saved theme never flashes. Hashed into the CSP by scripts/postbuild.mjs.
-const THEME_INIT = "try{var t=localStorage.getItem('ll.theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}";
-
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  // Every page carries a per-request nonce CSP (src/proxy.ts), so pages render dynamically on each request.
+  await connection();
+  const theme = await readTheme();
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable}`} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
-      </head>
-      <body>
-        {children}
-      </body>
+    <html lang="en" className={`${sans.variable} ${mono.variable}`} data-theme={theme === 'system' ? undefined : theme}>
+      <body>{children}</body>
     </html>
   );
 }

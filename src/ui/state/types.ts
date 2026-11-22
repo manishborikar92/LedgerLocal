@@ -22,4 +22,6 @@ export interface AppState {
   online: boolean;
   columnMode: boolean;
   exportScope: 'statement' | 'project';
+  /** the service worker has cached the app shell and PDF engine */
+  offlineReady: boolean;
 }

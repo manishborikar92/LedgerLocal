@@ -12,4 +12,4 @@ const worker = path.join(root, 'node_modules/pdfjs-dist/legacy/build/pdf.worker.
 if (!fs.existsSync(worker)) { console.error('pdfjs-dist is not installed: run npm ci'); process.exit(1); }
 fs.copyFileSync(worker, path.join(pub, 'pdfjs/pdf.worker.min.mjs'));
 
-console.log('prebuild ok');
+console.log('pdf.js worker copied to public/pdfjs');

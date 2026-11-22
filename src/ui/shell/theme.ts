@@ -1,22 +1,22 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { nextTheme, type ThemePreference } from '@/lib/theme';
+import { writeThemeCookie } from '@/lib/theme-cookie';
 
-export type ThemeMode = 'system' | 'light' | 'dark';
-const KEY = 'll.theme';
-export function applyTheme(m: ThemeMode): void {
-  const r = document.documentElement;
-  if (m === 'system') r.removeAttribute('data-theme'); else r.setAttribute('data-theme', m);
+export function applyTheme(t: ThemePreference): void {
+  const root = document.documentElement;
+  if (t === 'system') root.removeAttribute('data-theme');
+  else root.setAttribute('data-theme', t);
 }
-export function useTheme() {
-  const [mode, setMode] = useState<ThemeMode>('system');
-  useEffect(() => { try { const v = localStorage.getItem(KEY) as ThemeMode | null; if (v === 'light' || v === 'dark') setMode(v); } catch { /* storage unavailable */ } }, []);
+
+/** Client-side theme toggle for the workbench (no Server Action: that page's CSP forbids all network requests). */
+export function useTheme(initial: ThemePreference) {
+  const [mode, setMode] = useState<ThemePreference>(initial);
   const cycle = useCallback(() => {
-    setMode((m) => {
-      const n: ThemeMode = m === 'system' ? 'light' : m === 'light' ? 'dark' : 'system';
-      applyTheme(n);
-      try { if (n === 'system') localStorage.removeItem(KEY); else localStorage.setItem(KEY, n); } catch { /* ignore */ }
-      return n;
-    });
-  }, []);
+    const next = nextTheme(mode);
+    applyTheme(next);
+    writeThemeCookie(next);
+    setMode(next);
+  }, [mode]);
   return { mode, cycle };
 }

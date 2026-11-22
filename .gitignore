@@ -1,9 +1,8 @@
 node_modules
 .next
-out
-.keys
 *.tsbuildinfo
 test-results
 playwright-report
 .generated
 public/pdfjs/
+.env*.local

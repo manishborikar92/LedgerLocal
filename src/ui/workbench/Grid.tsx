@@ -123,17 +123,17 @@ export function Grid({ doc, rec, showPayee }: { doc: Doc; rec: ReconcileResult; 
                   const active = sel && cols[col] === c;
                   const tabStop = (activeIdx < 0 ? vi.index === 0 : sel) && cols[col] === c;
                   const editing = edit?.rowId === r.id && edit.col === c;
-                  const common = { role: 'gridcell' as const, id: `c-${r.id}-${c}`, 'aria-colindex': ci + 1, tabIndex: tabStop ? 0 : -1, 'data-active': active, key: c };
+                  const common = { role: 'gridcell' as const, id: `c-${r.id}-${c}`, 'aria-colindex': ci + 1, tabIndex: tabStop ? 0 : -1, 'data-active': active };
                   const select = () => { setCol(ci); focusRow(r.id); };
-                  if (c === 'check') return <div {...common} className="gcell" onClick={() => { select(); toggleChecked(r.id); }}><span role="checkbox" aria-checked={isChecked} aria-label={`Select row ${vi.index + 1}`}>{isChecked ? '☑' : '☐'}</span></div>;
+                  if (c === 'check') return <div key={c} {...common} className="gcell" onClick={() => { select(); toggleChecked(r.id); }}><span role="checkbox" aria-checked={isChecked} aria-label={`Select row ${vi.index + 1}`}>{isChecked ? '☑' : '☐'}</span></div>;
                   if (c === 'tick') return (
-                    <div {...common} className="gcell margin" onClick={select} title={chk === 'ok' ? 'Running balance matches' : chk === 'bad' ? 'Running balance does NOT match from this row' : 'No printed balance to check'}>
+                    <div key={c} {...common} className="gcell margin" onClick={select} title={chk === 'ok' ? 'Running balance matches' : chk === 'bad' ? 'Running balance does NOT match from this row' : 'No printed balance to check'}>
                       <span className={`tickmark ${chk}`} aria-label={chk === 'ok' ? 'Running balance verified' : chk === 'bad' ? 'Running balance mismatch' : 'Not checked'}>{chk === 'ok' ? '✓' : chk === 'bad' ? '✗' : '–'}</span>
                     </div>
                   );
                   if (editing) {
                     return (
-                      <div {...common} className="gcell" style={{ padding: 0 }}>
+                      <div key={c} {...common} className="gcell" style={{ padding: 0 }}>
                         <input autoFocus aria-label={`Edit ${HEAD[c]}`} aria-invalid={!!edit.error} aria-describedby={edit.error ? 'cell-err' : undefined} value={edit.value} onChange={(e) => setEdit({ ...edit, value: e.target.value, error: undefined })}
                           onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); commit('down'); } else if (e.key === 'Tab') { e.preventDefault(); commit('right'); } else if (e.key === 'Escape') { e.preventDefault(); setEdit(null); wantFocus.current = true; } }}
                           onBlur={() => { if (!edit.error) commit('none'); else setEdit(null); }} />
@@ -145,7 +145,7 @@ export function Grid({ doc, rec, showPayee }: { doc: Doc; rec: ReconcileResult; 
                   const val = c === 'amount' ? formatMinor(r.amountMinor, { exp }) : c === 'balance' ? (r.balanceMinor == null ? '' : formatMinor(r.balanceMinor, { exp })) : text(r, c);
                   const flags = c === 'description' ? (r.flags ?? []).filter((f) => FLAG_LABEL[f]) : [];
                   return (
-                    <div {...common} className={`gcell ${right ? 'r num' : ''} ${c === 'amount' && r.amountMinor < 0 ? 'neg' : ''}`} onClick={select} onDoubleClick={() => startEdit(r, c)} title={c === 'description' ? r.description : undefined}>
+                    <div key={c} {...common} className={`gcell ${right ? 'r num' : ''} ${c === 'amount' && r.amountMinor < 0 ? 'neg' : ''}`} onClick={select} onDoubleClick={() => startEdit(r, c)} title={c === 'description' ? r.description : undefined}>
                       {val}
                       {flags.map((f) => <span key={f} className="chip" style={{ fontSize: 11, padding: '0 6px', marginLeft: 8 }}>{FLAG_LABEL[f]}</span>)}
                     </div>

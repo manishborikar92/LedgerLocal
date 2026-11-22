@@ -38,7 +38,7 @@ export const GUIDES: Guide[] = [
     sections: [
       { h: 'Watch the network', p: ['Open your browser’s developer tools and the Network tab, clear it, then import a statement. A truly local tool shows no new requests.'] },
       { h: 'Go offline', p: ['Tick “Offline” in the Network tab (or switch on airplane mode) and import another statement. It should still work.'] },
-      { h: 'Read the policy', p: ['A page’s Content-Security-Policy can make uploads impossible, not just unlikely. LedgerLocal’s production pages declare connect-src \u0027none\u0027, which blocks fetch, XHR, WebSocket and beacons. You can read it in the page source.'] },
+      { h: 'Read the policy', p: ['A page’s Content-Security-Policy can make uploads impossible, not just unlikely. LedgerLocal’s workbench page (/app/) declares connect-src \u0027none\u0027, which blocks fetch, XHR, WebSocket, form posts and beacons; the other pages only allow requests to their own site. You can read the policy in the response headers: open the Network tab, click the /app/ document and look for Content-Security-Policy.'] },
     ],
   },
 ];

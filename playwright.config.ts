@@ -9,10 +9,14 @@ export default defineConfig({
   workers: 1,
   reporter: [['list']],
   outputDir: 'test-results',
-  use: { baseURL: `http://127.0.0.1:${PORT}`, trace: 'off', screenshot: 'off', acceptDownloads: true },
+  use: {
+    baseURL: `http://127.0.0.1:${PORT}`, trace: 'off', screenshot: 'off', acceptDownloads: true,
+    // Optional: point at an existing Chromium (LL_CHROMIUM_PATH) instead of `npx playwright install chromium`.
+    launchOptions: process.env.LL_CHROMIUM_PATH ? { executablePath: process.env.LL_CHROMIUM_PATH } : {},
+  },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } }, testIgnore: /mobile/ },
     { name: 'phone', use: { ...devices['Pixel 7'] }, testMatch: /mobile/ },
   ],
-  webServer: { command: `node scripts/serve.mjs ${PORT}`, url: `http://127.0.0.1:${PORT}/`, reuseExistingServer: true, timeout: 30_000 },
+  webServer: { command: `npx next start -p ${PORT}`, url: `http://127.0.0.1:${PORT}/api/health/`, reuseExistingServer: true, timeout: 60_000 },
 });

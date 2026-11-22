@@ -1,8 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { SITE } from '@/config/site';
 
-export const dynamic = 'force-static';
-
 // Relative URLs resolve against the manifest's own URL, so this works under any base path.
 export default function manifest(): MetadataRoute.Manifest {
   return {

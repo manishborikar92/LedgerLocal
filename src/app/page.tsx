@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 const FEATURES: { icon: React.ReactNode; title: string; body: string; cls?: string }[] = [
-  { icon: <Shield />, title: 'Private by construction', body: 'Statements are read in a Web Worker on your device. The page’s security policy forbids every network request, so uploading is not just avoided but impossible.', cls: 'wide' },
+  { icon: <Shield />, title: 'Private by construction', body: 'Statements are read in a Web Worker on your device. The workbench page’s security policy forbids every network request, so uploading is not just avoided but impossible.', cls: 'wide' },
   { icon: <Check />, title: 'Reconciliation you can see', body: 'Opening balance + movements = closing balance, plus a row-by-row check of the printed running balance. A mismatch shows the difference and jumps to the first bad row.', cls: 'wide' },
   { icon: <File />, title: 'Audit trail on the PDF', body: 'Click a row to see exactly where its date, description, amount and balance were read; click a box on the page to select its row.' },
   { icon: <Download />, title: 'The formats you need', body: 'QuickBooks .QBO, OFX, Excel with a live reconciliation sheet, and CSV with configurable columns, dates and decimal marks.' },
@@ -26,7 +26,7 @@ const FAQ: [string, string][] = [
   ['Which statements work?', 'Text-based PDFs from banks and card issuers: signed or debit/credit columns, running balances, multi-line descriptions, multi-page tables, and US, UK, European and Indian number and date formats. Scanned (image-only) PDFs are rejected with a clear message; offline OCR is on the roadmap.'],
   ['How accurate is it?', 'On 200 synthetic statements across 20 layouts, every row was recovered and every statement reconciled. That is a ceiling, not a forecast: the same people wrote the test generator and the parser. Real statements vary more, which is why every file shows a reconciliation proof and a clickable audit trail.'],
   ['Will the export import into QuickBooks or Xero?', 'The QBO and OFX files are validated with an independent OFX parser, but they have not been tested in real QuickBooks or Xero. Import one small statement first; the README lists steps and the one setting (INTU.BID) that may need attention.'],
-  ['Do I need an account?', 'No. There are no accounts, sign-ins or servers. Open the app, drop in a PDF.'],
+  ['Do I need an account?', 'No. There are no accounts or sign-ins, and nothing about your statements ever reaches a server. Open the app, drop in a PDF.'],
   ['Does it work offline?', 'Yes. After the first visit the app is cached by a service worker and can be installed like an app; the whole workflow runs without a connection.'],
 ];
 

@@ -3,9 +3,9 @@
   "rows": 4300,
   "truthRows": 4300,
   "pdfKB": 282,
-  "extractMs": 2407,
-  "parseMs": 378,
+  "extractMs": 2091,
+  "parseMs": 377,
   "reconcileMs": 1,
   "status": "reconciled",
-  "node": "v22.22.2"
+  "node": "v22.23.5"
 }
