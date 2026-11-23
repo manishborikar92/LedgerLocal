@@ -1,4 +1,8 @@
-/** Node helper for tests and tools: parse a PDF byte array with pdf.js (legacy build) and our parser. */
+/**
+ * Node helper for tests and tools: parse a PDF byte array with pdf.js and our parser. Node uses pdf.js's LEGACY build on purpose:
+ * pdf.js itself says to (the modern build prints a warning here), and Node 22 lacks the newer JavaScript the modern build assumes.
+ * The browser bundle uses the modern build; the E2E suite covers that one.
+ */
 import { extractAllPages, type PdfjsLike } from '../src/adapters/pdf/extract';
 import { parseStatement, type ParseOptions, type ParseOutput } from '../src/core/parse';
 

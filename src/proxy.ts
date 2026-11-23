@@ -23,7 +23,7 @@ export const config = {
   matcher: [
     {
       // Pages only: skip static assets, metadata files, the service worker and API routes.
-      source: '/((?!api|_next/static|_next/image|pdfjs|icons|sw\\.js|manifest\\.webmanifest|robots\\.txt|sitemap\\.xml|.*\\.(?:png|jpg|jpeg|svg|ico|webp|woff2?)$).*)',
+      source: '/((?!api|_next/static|_next/image|icons|sw\\.js|manifest\\.webmanifest|robots\\.txt|sitemap\\.xml|.*\\.(?:png|jpg|jpeg|svg|ico|webp|woff2?)$).*)',
       missing: [
         { type: 'header', key: 'next-router-prefetch' },
         { type: 'header', key: 'purpose', value: 'prefetch' },

@@ -59,6 +59,22 @@ test('error states: not a PDF, corrupt PDF, scanned (image-only) PDF; cancel wor
   await expect(page.getByText('is already open')).toBeVisible();
 });
 
+test('a browser that lacks what the PDF engine needs gets a clear message, not a misleading read error', async ({ page }) => {
+  // Simulate a browser from before late 2025: the newest feature pdf.js needs is Map.prototype.getOrInsertComputed.
+  await page.addInitScript(() => {
+    delete (Map.prototype as unknown as Record<string, unknown>).getOrInsert;
+    delete (Map.prototype as unknown as Record<string, unknown>).getOrInsertComputed;
+  });
+  await page.goto('/app/');
+  await expect(page.getByTestId('unsupported-browser')).toContainText('too old');
+  await expect(page.getByTestId('unsupported-browser')).toContainText('Chrome or Edge 145');
+  const bank = await pdfFile('bank-signed', 41, {}, 'a.pdf');
+  await page.getByTestId('file-input').setInputFiles(bank.file);
+  await expect(page.getByTestId('queue')).toContainText('too old for LedgerLocal');
+  await expect(page.getByTestId('queue')).not.toContainText('could not be read');
+  await expect(stamp(page)).toHaveCount(0); // nothing was half-parsed
+});
+
 test('projects: ephemeral by default, save without PDFs, re-attach by hash, save with PDFs, wipe', async ({ page }) => {
   await page.goto('/app/');
   const sample = await pdfFile('bank-signed', 11, {}, 'saved.pdf');

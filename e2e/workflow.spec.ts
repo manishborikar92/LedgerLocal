@@ -51,6 +51,7 @@ test('first-run: sample statement reaches RECONCILED, audit trail highlights, no
   const t0 = Date.now();
   await page.getByTestId('try-sample').click();
   await waitStatus(page, 'reconciled');
+  await expect(page.getByTestId('unsupported-browser')).toHaveCount(0); // a current browser is never told it is too old
   const seconds = (Date.now() - t0) / 1000;
   console.log(`first-run: sample -> RECONCILED in ${seconds.toFixed(1)}s`);
   expect(seconds).toBeLessThan(30);

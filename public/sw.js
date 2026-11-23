@@ -6,10 +6,10 @@
  *  - every file the build can request, from /_next/static/ll-precache.json (written by next.config.mjs). That list
  *    includes the lazily loaded chunks (workbench, dialogs, export engine, parse worker, pdf.js renderer) that the
  *    HTML never mentions, so nothing has to be executed on the main thread to warm the cache;
- *  - the HTML's own asset references, the pdf.js worker, icons and the web manifest.
+ *  - the HTML's own asset references, icons and the web manifest (the pdf.js worker is an ordinary hashed build file in the list).
  * Install fails (so the app is never reported as offline-ready) unless every one of those files was cached.
  *
- * Strategy: /_next/static, /pdfjs, /icons are cache-first (hashed, immutable); navigations to /app/ are
+ * Strategy: /_next/static and /icons are cache-first (hashed, immutable); navigations to /app/ are
  * network-first with the cached document as fallback. This file never changes between deploys, so the browser will
  * not re-run `install` for a new release; instead every successful online visit to /app/ checks whether the shell's
  * asset set changed and, if so, precaches the new build before swapping the cached document.
@@ -20,9 +20,9 @@ const APP = `${SCOPE}/app/`;
 const NEXT = `${SCOPE}/_next/`;
 const PRECACHE_LIST = `${NEXT}static/ll-precache.json`;
 const META = `${SCOPE}/__precache-meta__`;
-const CORE = [`${SCOPE}/pdfjs/pdf.worker.min.mjs`, `${SCOPE}/icons/icon-192.png`, `${SCOPE}/icons/icon-512.png`, `${SCOPE}/manifest.webmanifest`];
+const CORE = [`${SCOPE}/icons/icon-192.png`, `${SCOPE}/icons/icon-512.png`, `${SCOPE}/manifest.webmanifest`];
 const isHashed = (path) => path.startsWith(`${NEXT}static/`);
-const cacheable = (path) => isHashed(path) || path.startsWith(`${SCOPE}/pdfjs/`) || path.startsWith(`${SCOPE}/icons/`);
+const cacheable = (path) => isHashed(path) || path.startsWith(`${SCOPE}/icons/`);
 const isAppNavigation = (url) => url.pathname === APP || url.pathname === APP.slice(0, -1);
 
 /** Assets the shell document references, normalised without query strings (hashed files are immutable). */

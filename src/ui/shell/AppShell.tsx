@@ -1,6 +1,7 @@
 'use client';
 import dynamic from 'next/dynamic';
-import { useEffect } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
+import { missingBrowserFeatures, UNSUPPORTED_BROWSER_MESSAGE } from '@/composition';
 import { withBase } from '@/config/paths';
 import type { ThemePreference } from '@/lib/theme';
 import { EmptyState } from '@/ui/import/ImportPanel';
@@ -14,6 +15,7 @@ import { ViewRouter } from './ViewRouter';
 // Dialogs (export, projects, report…) are only needed after a click, so their code loads on first use.
 const Dialogs = dynamic(() => import('@/ui/dialogs/Dialogs').then((m) => m.Dialogs));
 
+const never = () => () => {};
 const VIEWS = [['work', 'Workbench'], ['ledger', 'Merged ledger'], ['rules', 'Payees & rules']] as const;
 
 export function AppShell({ initialTheme }: { initialTheme: ThemePreference }) {
@@ -25,6 +27,8 @@ export function AppShell({ initialTheme }: { initialTheme: ThemePreference }) {
   const dirty = useSel(store, (s) => s.project.dirty);
   const { mode, cycle } = useTheme(initialTheme);
   const offlineReady = useSel(store, (s) => s.offlineReady);
+  // false on the server and during hydration; the real answer only exists in the browser
+  const unsupported = useSyncExternalStore(never, () => missingBrowserFeatures().length > 0, () => false);
 
   useEffect(() => {
     setOnline(navigator.onLine);
@@ -59,6 +63,7 @@ export function AppShell({ initialTheme }: { initialTheme: ThemePreference }) {
         <button className="btn btn-sm btn-quiet" onClick={cycle} aria-label={`Theme: ${mode}. Click to change`} title={`Theme: ${mode}`}>{mode === 'light' ? <Sun /> : mode === 'dark' ? <Moon /> : <Monitor />}</button>
         <button className="btn btn-sm btn-quiet" onClick={() => openDialog('shortcuts')} aria-label="Help and keyboard shortcuts"><Help /></button>
       </header>
+      {unsupported && <div className="note bad m-3" role="alert" data-testid="unsupported-browser">{UNSUPPORTED_BROWSER_MESSAGE}</div>}
       <main id="main" className={`flex min-h-0 flex-1 flex-col ${hasDocs && view === 'work' ? 'overflow-hidden' : 'overflow-auto'}`}>
         {hasDocs ? <ViewRouter view={view} /> : <EmptyState />}
       </main>

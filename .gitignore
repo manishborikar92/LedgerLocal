@@ -4,5 +4,4 @@ node_modules
 test-results
 playwright-report
 .generated
-public/pdfjs/
 .env*.local

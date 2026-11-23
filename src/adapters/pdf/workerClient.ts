@@ -1,4 +1,5 @@
 import type { ParseOptions, ParseOutput } from '@/core/parse';
+import { missingBrowserFeatures, UNSUPPORTED_BROWSER_MESSAGE } from './browserSupport';
 import type { WorkerRequest, WorkerResponse } from './protocol';
 
 import { ParseFailure } from '@/ports/errors';
@@ -45,6 +46,7 @@ export class ParseClient {
   }
 
   parse(bytes: Uint8Array, fileName: string, o: { password?: string; options?: ParseOptions; onProgress?: (d: number, t: number) => void } = {}) {
+    if (missingBrowserFeatures().length > 0) return { id: ++this.seq, promise: Promise.reject<ParseResult>(new ParseFailure('unsupported-browser', UNSUPPORTED_BROWSER_MESSAGE)) };
     const copy = bytes.slice().buffer as ArrayBuffer;
     return this.send({ type: 'parse', id: ++this.seq, bytes: copy, fileName, password: o.password, options: o.options }, o.onProgress, [copy]);
   }

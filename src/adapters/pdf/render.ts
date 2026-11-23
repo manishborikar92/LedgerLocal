@@ -1,12 +1,13 @@
 /** Main-thread page rendering via pdf.js (its own real worker; no network, no eval, no scripting). */
-import { BASE_PATH } from '@/config/app-config';
 
 type PdfjsModule = typeof import('pdfjs-dist');
-// The LEGACY build carries polyfills (e.g. Map.getOrInsertComputed) so rendering works in browsers a few releases old.
+// The modern pdf.js build (no polyfills; see browserSupport.ts for the browsers it needs). The bundler resolves the worker
+// against the installed pdfjs-dist and emits it as a hashed, immutable file on our own origin (no CDN, nothing to copy),
+// so the library and its worker can never drift apart.
 let lib: Promise<PdfjsModule> | null = null;
 function load(): Promise<PdfjsModule> {
-  lib ??= (import('pdfjs-dist/legacy/build/pdf.mjs') as Promise<PdfjsModule>).then((m) => {
-    m.GlobalWorkerOptions.workerSrc = `${BASE_PATH}/pdfjs/pdf.worker.min.mjs`;
+  lib ??= import('pdfjs-dist').then((m) => {
+    m.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
     return m;
   });
   return lib;

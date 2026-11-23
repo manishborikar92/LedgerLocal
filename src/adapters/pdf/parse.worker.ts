@@ -4,8 +4,8 @@
  * + the pure core parser. Nothing here can reach the network: pdf.js eval/scripting are off and the
  * page CSP forbids connect-src.
  */
-import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
-import { WorkerMessageHandler } from 'pdfjs-dist/legacy/build/pdf.worker.mjs';
+import * as pdfjs from 'pdfjs-dist';
+import { WorkerMessageHandler } from 'pdfjs-dist/build/pdf.worker.mjs';
 import { sha256Hex } from '@/core/hash';
 import type { PageText } from '@/core/geometry';
 import { ParseError, parseStatement } from '@/core/parse';

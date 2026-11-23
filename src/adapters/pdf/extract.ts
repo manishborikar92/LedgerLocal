@@ -1,5 +1,5 @@
 /**
- * pdf.js -> core PageText adapter. Works with either the browser build or the Node legacy build
+ * pdf.js -> core PageText adapter. Works with the modern build (browsers) and the legacy build (Node tooling)
  * (the caller injects the pdfjs module). Runs in a Web Worker in the app; never touches the network.
  */
 import type { PageText, TextItem } from '@/core/geometry';

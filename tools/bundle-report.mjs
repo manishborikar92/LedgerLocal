@@ -7,7 +7,7 @@
  *   node tools/bundle-report.mjs [--base http://127.0.0.1:3000]
  *
  * "First load" = the scripts and styles the page's HTML references. "Offline install" = every file the service worker
- * caches for the workbench (the build's precache list plus the pdf.js worker), i.e. the one-time download for offline use.
+ * caches for the workbench (the build's precache list, which includes the pdf.js worker), i.e. the one-time download for offline use.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -46,17 +46,16 @@ const appJs = new Set(pages.at(-1)._js);
 
 const list = JSON.parse(fs.readFileSync(path.join(staticDir, 'll-precache.json'), 'utf8')).files;
 const all = list.map((f) => ({ file: f, ...size(f) }));
-const worker = path.join(root, 'public/pdfjs/pdf.worker.min.mjs');
-const wbuf = fs.readFileSync(worker);
-const workerSize = { raw: wbuf.length, gzip: zlib.gzipSync(wbuf, { level: 9 }).length };
+const workerFile = all.find((x) => /^static\/media\/pdf\.worker\.min\..+\.mjs$/.test(x.file));
+if (!workerFile) throw new Error('pdf.js worker not found in the precache list');
 const lazy = all.filter((x) => x.file.endsWith('.js') && !appJs.has(x.file)).sort((a, b) => b.gzip - a.gzip);
 
 const report = {
   note: 'gzip level 9 sizes from the production build in .next; a host may compress slightly differently. First load = files referenced by the page HTML.',
   firstLoad: pages.map(({ _js, ...p }) => p),
   workbenchLazyJs: { files: lazy.length, gzipKB: kb(lazy.reduce((a, x) => a + x.gzip, 0)), largestGzipKB: lazy.slice(0, 4).map((x) => kb(x.gzip)) },
-  pdfjsWorkerFile: { rawKB: kb(workerSize.raw), gzipKB: kb(workerSize.gzip), note: 'public/pdfjs/pdf.worker.min.mjs, loaded when a page is rendered' },
-  offlineInstall: { files: all.length + 1, rawKB: kb(all.reduce((a, x) => a + x.raw, workerSize.raw)), gzipKB: kb(all.reduce((a, x) => a + x.gzip, workerSize.gzip)), note: 'every build file plus the pdf.js worker; icons and the manifest add a few KB' },
+  pdfjsWorkerFile: { file: workerFile.file, rawKB: kb(workerFile.raw), gzipKB: kb(workerFile.gzip), note: 'hashed build asset, loaded when a page is rendered; included in the offline install' },
+  offlineInstall: { files: all.length, rawKB: kb(all.reduce((a, x) => a + x.raw, 0)), gzipKB: kb(all.reduce((a, x) => a + x.gzip, 0)), note: 'every file in the build precache list; icons and the manifest add a few KB' },
 };
 fs.writeFileSync(path.join(root, 'docs/bundle-report.json'), `${JSON.stringify(report, null, 2)}\n`);
 console.log(JSON.stringify(report, null, 2));

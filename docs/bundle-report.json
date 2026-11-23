@@ -3,42 +3,43 @@
   "firstLoad": [
     {
       "route": "/",
-      "jsGzipKB": 168.7,
+      "jsGzipKB": 168.8,
       "cssGzipKB": 8.7,
       "jsFiles": 5
     },
     {
       "route": "/guides/verify-offline/",
-      "jsGzipKB": 168.7,
+      "jsGzipKB": 168.8,
       "cssGzipKB": 8.7,
       "jsFiles": 5
     },
     {
       "route": "/app/",
-      "jsGzipKB": 211.6,
+      "jsGzipKB": 212,
       "cssGzipKB": 8.7,
       "jsFiles": 8
     }
   ],
   "workbenchLazyJs": {
     "files": 32,
-    "gzipKB": 706.4,
+    "gzipKB": 672.5,
     "largestGzipKB": [
-      370.5,
-      144,
+      354.9,
+      125.7,
       67.1,
       39.6
     ]
   },
   "pdfjsWorkerFile": {
-    "rawKB": 1290.3,
-    "gzipKB": 383,
-    "note": "public/pdfjs/pdf.worker.min.mjs, loaded when a page is rendered"
+    "file": "static/media/pdf.worker.min.b5bdd91a.mjs",
+    "rawKB": 1154.5,
+    "gzipKB": 354.5,
+    "note": "hashed build asset, loaded when a page is rendered; included in the offline install"
   },
   "offlineInstall": {
     "files": 44,
-    "rawKB": 4398,
-    "gzipKB": 1447.2,
-    "note": "every build file plus the pdf.js worker; icons and the manifest add a few KB"
+    "rawKB": 4158.2,
+    "gzipKB": 1385.2,
+    "note": "every file in the build precache list; icons and the manifest add a few KB"
   }
 }

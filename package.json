@@ -47,9 +47,7 @@
     "vitest": "5.0.5"
   },
   "scripts": {
-    "predev": "node scripts/copy-pdfjs-worker.mjs",
     "dev": "next dev --webpack",
-    "prebuild": "node scripts/copy-pdfjs-worker.mjs",
     "build": "next build --webpack",
     "start": "next start",
     "test:e2e": "playwright test",

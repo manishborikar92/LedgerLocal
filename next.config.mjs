@@ -56,7 +56,6 @@ const nextConfig = {
           { key: 'Content-Security-Policy', value: "default-src 'none'; connect-src 'self'" },
         ],
       },
-      { source: '/pdfjs/:path*', headers: [{ key: 'Cache-Control', value: 'public, max-age=86400' }] },
     ];
   },
 };

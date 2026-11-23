@@ -44,6 +44,16 @@ describe('repository hygiene (catches leaked scratch files and machine-specific 
     expect(pkg.scripts.dev).toContain('--webpack');
     expect(pkg.scripts.build).toContain('--webpack');
   });
+  it('pdf.js: the browser bundle uses the modern build and a bundler-emitted worker; legacy only in Node tooling', () => {
+    const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')) as { scripts: Record<string, string> };
+    expect(pkg.scripts.predev).toBeUndefined(); // no copy step: the worker is resolved from node_modules by the bundler
+    expect(pkg.scripts.prebuild).toBeUndefined();
+    expect(fs.existsSync(path.join(ROOT, 'scripts/copy-pdfjs-worker.mjs'))).toBe(false);
+    const legacyInApp = files.map(rel).filter((f) => f.startsWith('src/') && /\.(ts|tsx)$/.test(f) && fs.readFileSync(path.join(ROOT, f), 'utf8').includes('pdfjs-dist/legacy'));
+    expect(legacyInApp).toEqual([]); // the legacy build exists for Node, where the modern build prints a warning and lacks newer APIs
+    const render = fs.readFileSync(path.join(ROOT, 'src/adapters/pdf/render.ts'), 'utf8');
+    expect(render).toContain("new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url)");
+  });
   it('no pricing, payment, licence-key or separate-backend vocabulary in app source', () => {
     const bad: string[] = [];
     const re = /\b(pricing|subscription|checkout|merchant of record|licen[cs]e key|control plane)\b/i;
