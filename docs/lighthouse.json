@@ -3,29 +3,29 @@
     "url": "/",
     "runs": 3,
     "scores": {
-      "performance": 86,
+      "performance": 90,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
     },
     "metricsMedianMs": {
-      "FCP": 926,
-      "LCP": 926,
-      "TBT": 573,
+      "FCP": 983,
+      "LCP": 983,
+      "TBT": 407,
       "CLS": 0,
-      "SI": 1181
+      "SI": 1044
     },
     "performanceByRun": [
-      82,
-      87,
-      86
+      90,
+      94,
+      90
     ]
   },
   "_environment": {
     "lighthouse": "13.6.0",
     "chrome": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
     "cpus": 1,
-    "benchmarkIndexMedian": 1393
+    "benchmarkIndexMedian": 2536
   },
   "_note": "Measured against `next start` (production build, gzip on) on the machine above; mobile = simulated slow 4G + 4x CPU slowdown. Scores are the median of the runs listed; run-to-run variance is several points, and a different machine will give different numbers.",
   "Landing, desktop": {
@@ -38,38 +38,38 @@
       "seo": 100
     },
     "metricsMedianMs": {
-      "FCP": 286,
-      "LCP": 286,
-      "TBT": 43,
+      "FCP": 269,
+      "LCP": 269,
+      "TBT": 21,
       "CLS": 0,
-      "SI": 454
+      "SI": 384
     },
     "performanceByRun": [
       100,
       100,
-      99
+      97
     ]
   },
   "Guide page, mobile": {
     "url": "/guides/verify-offline/",
     "runs": 3,
     "scores": {
-      "performance": 83,
+      "performance": 93,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
     },
     "metricsMedianMs": {
-      "FCP": 771,
-      "LCP": 771,
-      "TBT": 692,
+      "FCP": 761,
+      "LCP": 761,
+      "TBT": 314,
       "CLS": 0,
-      "SI": 1144
+      "SI": 828
     },
     "performanceByRun": [
-      82,
-      83,
-      89
+      93,
+      93,
+      93
     ]
   },
   "Guide page, desktop": {
@@ -82,11 +82,11 @@
       "seo": 100
     },
     "metricsMedianMs": {
-      "FCP": 246,
-      "LCP": 246,
-      "TBT": 18,
+      "FCP": 238,
+      "LCP": 238,
+      "TBT": 6,
       "CLS": 0,
-      "SI": 393
+      "SI": 351
     },
     "performanceByRun": [
       100,
@@ -98,21 +98,21 @@
     "url": "/app/",
     "runs": 3,
     "scores": {
-      "performance": 85,
+      "performance": 90,
       "accessibility": 100,
       "best-practices": 100
     },
     "metricsMedianMs": {
-      "FCP": 817,
-      "LCP": 817,
-      "TBT": 578,
+      "FCP": 772,
+      "LCP": 772,
+      "TBT": 419,
       "CLS": 0,
-      "SI": 1096
+      "SI": 946
     },
     "performanceByRun": [
-      87,
-      85,
-      84
+      88,
+      91,
+      90
     ],
     "note": "SEO audit omitted: the workbench is intentionally noindex."
   },
@@ -125,11 +125,11 @@
       "best-practices": 100
     },
     "metricsMedianMs": {
-      "FCP": 245,
-      "LCP": 245,
-      "TBT": 50,
+      "FCP": 233,
+      "LCP": 233,
+      "TBT": 27,
       "CLS": 0,
-      "SI": 431
+      "SI": 333
     },
     "performanceByRun": [
       100,

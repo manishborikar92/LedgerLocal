@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { missingBrowserFeatures, SUPPORTED_BROWSERS, UNSUPPORTED_BROWSER_MESSAGE } from '@/adapters/pdf/browserSupport';
 
@@ -29,5 +31,11 @@ describe('browser support check for the modern pdf.js build', () => {
     expect(SUPPORTED_BROWSERS).toMatch(/Chrome or Edge 145.*Firefox 144.*Safari 26\.2/);
     expect(UNSUPPORTED_BROWSER_MESSAGE).toMatch(/too old/);
     expect(UNSUPPORTED_BROWSER_MESSAGE).toMatch(/not uploaded/);
+  });
+  it('the probe tool tests exactly the features the gate checks (keep tools/check-browser-support.mjs in sync)', () => {
+    const tool = fs.readFileSync(path.join(__dirname, '../../tools/check-browser-support.mjs'), 'utf8');
+    const gated = tool.slice(tool.indexOf('const GATED = {'), tool.indexOf('};', tool.indexOf('const GATED = {')));
+    for (const needle of ['getOrInsertComputed', 'Promise.withResolvers', 'Promise.try', 'Uint8Array.prototype.toHex']) expect(gated).toContain(needle);
+    expect(gated.match(/^ {2}'[^']+':/gm)).toHaveLength(TARGETS.length);
   });
 });

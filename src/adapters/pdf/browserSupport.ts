@@ -1,10 +1,10 @@
 /**
  * The PDF engine is pdf.js's modern build, which ships no polyfills and uses recent JavaScript. This lists the features
- * it was observed to need (by removing each one in a real browser and reading a statement), so a browser that lacks one
- * gets a clear message instead of a misleading "this file could not be read".
- *  - main thread (page preview):  Map.prototype.getOrInsertComputed, Promise.withResolvers
- *  - workers (parsing, rendering): Promise.try, Uint8Array.prototype.toHex
- * The newest of these is getOrInsertComputed (ECMAScript 2026): Chrome/Edge 145, Firefox 144, Safari and iOS 26.2.
+ * it was observed to need (found by removing each one in a real browser, in the page and in the workers, and reading a
+ * statement; `node tools/check-browser-support.mjs` repeats that and must be re-run when pdfjs-dist is upgraded), so a
+ * browser that lacks one gets a clear message instead of a misleading "this file could not be read".
+ * Which realm needs which feature can change between pdf.js versions, so the page checks all of them.
+ * The newest is Map.prototype.getOrInsertComputed (ECMAScript 2026): Chrome/Edge 145, Firefox 144, Safari and iOS 26.2.
  */
 const REQUIRED: ReadonlyArray<readonly [label: string, present: () => boolean]> = [
   ['Map.prototype.getOrInsertComputed', () => 'getOrInsertComputed' in Map.prototype],

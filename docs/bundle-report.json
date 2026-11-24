@@ -22,24 +22,24 @@
   ],
   "workbenchLazyJs": {
     "files": 32,
-    "gzipKB": 672.5,
+    "gzipKB": 679.9,
     "largestGzipKB": [
-      354.9,
-      125.7,
+      357.7,
+      130.1,
       67.1,
       39.6
     ]
   },
   "pdfjsWorkerFile": {
-    "file": "static/media/pdf.worker.min.b5bdd91a.mjs",
-    "rawKB": 1154.5,
-    "gzipKB": 354.5,
+    "file": "static/media/pdf.worker.min.9f5bff85.mjs",
+    "rawKB": 1161.5,
+    "gzipKB": 357.2,
     "note": "hashed build asset, loaded when a page is rendered; included in the offline install"
   },
   "offlineInstall": {
     "files": 44,
-    "rawKB": 4158.2,
-    "gzipKB": 1385.2,
+    "rawKB": 4187,
+    "gzipKB": 1395.4,
     "note": "every file in the build precache list; icons and the manifest add a few KB"
   }
 }
