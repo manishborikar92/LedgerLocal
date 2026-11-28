@@ -3,34 +3,34 @@
     "url": "/",
     "runs": 3,
     "scores": {
-      "performance": 90,
+      "performance": 94,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
     },
     "metricsMedianMs": {
-      "FCP": 983,
-      "LCP": 983,
-      "TBT": 407,
+      "FCP": 937,
+      "LCP": 937,
+      "TBT": 286,
       "CLS": 0,
-      "SI": 1044
+      "SI": 1080
     },
     "performanceByRun": [
-      90,
-      94,
-      90
+      91,
+      96,
+      94
     ]
   },
   "_environment": {
     "lighthouse": "13.6.0",
     "chrome": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
     "cpus": 1,
-    "benchmarkIndexMedian": 2536
+    "benchmarkIndexMedian": 2484
   },
   "_note": "Measured against `next start` (production build, gzip on) on the machine above; mobile = simulated slow 4G + 4x CPU slowdown. Scores are the median of the runs listed; run-to-run variance is several points, and a different machine will give different numbers.",
   "Landing, desktop": {
     "url": "/",
-    "runs": 3,
+    "runs": 5,
     "scores": {
       "performance": 100,
       "accessibility": 100,
@@ -38,37 +38,39 @@
       "seo": 100
     },
     "metricsMedianMs": {
-      "FCP": 269,
-      "LCP": 269,
-      "TBT": 21,
+      "FCP": 264,
+      "LCP": 264,
+      "TBT": 20,
       "CLS": 0,
-      "SI": 384
+      "SI": 373
     },
     "performanceByRun": [
       100,
       100,
-      97
+      100,
+      100,
+      100
     ]
   },
   "Guide page, mobile": {
     "url": "/guides/verify-offline/",
     "runs": 3,
     "scores": {
-      "performance": 93,
+      "performance": 91,
       "accessibility": 100,
       "best-practices": 100,
       "seo": 100
     },
     "metricsMedianMs": {
-      "FCP": 761,
-      "LCP": 761,
-      "TBT": 314,
+      "FCP": 773,
+      "LCP": 773,
+      "TBT": 380,
       "CLS": 0,
-      "SI": 828
+      "SI": 972
     },
     "performanceByRun": [
-      93,
-      93,
+      84,
+      91,
       93
     ]
   },
@@ -82,11 +84,11 @@
       "seo": 100
     },
     "metricsMedianMs": {
-      "FCP": 238,
-      "LCP": 238,
-      "TBT": 6,
+      "FCP": 233,
+      "LCP": 233,
+      "TBT": 0,
       "CLS": 0,
-      "SI": 351
+      "SI": 327
     },
     "performanceByRun": [
       100,
@@ -96,23 +98,25 @@
   },
   "App shell /app/, mobile": {
     "url": "/app/",
-    "runs": 3,
+    "runs": 5,
     "scores": {
-      "performance": 90,
+      "performance": 93,
       "accessibility": 100,
       "best-practices": 100
     },
     "metricsMedianMs": {
-      "FCP": 772,
-      "LCP": 772,
-      "TBT": 419,
+      "FCP": 779,
+      "LCP": 779,
+      "TBT": 304,
       "CLS": 0,
-      "SI": 946
+      "SI": 846
     },
     "performanceByRun": [
-      88,
+      93,
       91,
-      90
+      87,
+      96,
+      96
     ],
     "note": "SEO audit omitted: the workbench is intentionally noindex."
   },
@@ -125,11 +129,11 @@
       "best-practices": 100
     },
     "metricsMedianMs": {
-      "FCP": 233,
-      "LCP": 233,
-      "TBT": 27,
+      "FCP": 238,
+      "LCP": 238,
+      "TBT": 6,
       "CLS": 0,
-      "SI": 333
+      "SI": 295
     },
     "performanceByRun": [
       100,

@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { getServices } from '@/composition';
-import { Check, Lock, Shield, Upload } from '@/ui/primitives/icons';
+import { Lock, Plus, Upload } from '@/ui/primitives/icons';
 import { cancelItem, closeDialog, dismissItem, enqueueFiles, loadSampleById, openDialog, store, submitPassword, useSel } from '@/ui/state';
 
 export function DropZone({ compact }: { compact?: boolean }) {
@@ -13,35 +13,40 @@ export function DropZone({ compact }: { compact?: boolean }) {
       className={`drop ${compact ? 'drop-compact' : ''}`}
       data-over={over}
       data-testid="dropzone"
+      title={compact ? 'Add more PDFs, or drop them here' : undefined}
       onDragOver={(e) => { e.preventDefault(); setOver(true); }}
       onDragLeave={() => setOver(false)}
       onDrop={(e) => { e.preventDefault(); setOver(false); take(e.dataTransfer.files); }}
     >
       <input ref={input} type="file" accept="application/pdf,.pdf" multiple className="sr-only" aria-label="Choose PDF statements" data-testid="file-input" onChange={(e) => { take(e.target.files); e.target.value = ''; }} />
-      {!compact && <div className="mx-auto mb-3 grid h-11 w-11 place-items-center rounded-full bg-accent-soft text-accent"><Upload /></div>}
-      <div>
-        <strong className={compact ? 'text-sm' : 'text-lg'}>{compact ? 'Add more PDFs' : 'Drop PDF statements here'}</strong>
-        {!compact && <p className="muted mb-4 mt-1">Bank or credit-card statements, several at once. Files are read on this device and never uploaded.</p>}
-      </div>
-      <button className={`btn ${compact ? 'btn-sm' : 'btn-primary btn-lg'}`} onClick={() => input.current?.click()}>Choose PDFs…</button>
+      {compact ? (
+        <button className="btn btn-sm" onClick={() => input.current?.click()}><Plus /> Add PDFs</button>
+      ) : (
+        <>
+          <span className="text-accent"><Upload size={28} /></span>
+          <strong className="text-lg">Drop PDF statements here</strong>
+          <p className="muted m-0 max-w-sm text-sm">Bank or credit-card statements, several at once. Files are read on this device and never uploaded.</p>
+          <button className="btn btn-primary btn-lg" onClick={() => input.current?.click()}>Choose PDFs…</button>
+        </>
+      )}
     </div>
   );
 }
 
 const STATUS_TEXT = { queued: 'Waiting…', parsing: 'Reading…', password: 'Password needed', error: 'Could not read', done: 'Done', cancelled: 'Cancelled' } as const;
 
-export function QueueList() {
+export function QueueList({ inBench }: { inBench?: boolean }) {
   const queue = useSel(store, (s) => s.queue);
   const [pw, setPw] = useState<Record<string, string>>({});
   const items = queue.filter((q) => q.status !== 'done' && q.status !== 'cancelled');
   if (!items.length) return null;
   return (
-    <ul className="m-0 grid list-none gap-2 p-0" aria-label="Import queue" data-testid="queue">
+    <ul className={`queue ${inBench ? 'queue-in-bench' : ''}`} aria-label="Import queue" data-testid="queue">
       {items.map((q) => (
-        <li key={q.id} className="panel p-3">
+        <li key={q.id} className={`panel qrow ${q.status === 'error' ? 'is-error' : ''} ${q.status === 'password' ? 'is-wait' : ''}`}>
           <div className="flex items-center gap-3">
             <strong className="min-w-0 flex-1 truncate">{q.name}</strong>
-            <span className="muted text-[13px]">{q.status === 'parsing' ? `Reading… ${Math.round(q.progress * 100)}%` : STATUS_TEXT[q.status]}</span>
+            <span className="muted num text-[13px]">{q.status === 'parsing' ? `Reading… ${Math.round(q.progress * 100)}%` : STATUS_TEXT[q.status]}</span>
             {(q.status === 'queued' || q.status === 'parsing') && <button className="btn btn-sm" onClick={() => cancelItem(q.id)}>Cancel</button>}
             {(q.status === 'error' || q.status === 'password') && <button className="btn btn-sm btn-quiet" onClick={() => dismissItem(q.id)}>Dismiss</button>}
           </div>
@@ -54,8 +59,8 @@ export function QueueList() {
               <button className="btn btn-primary" type="submit">Unlock</button>
             </form>
           )}
-          {q.passwordWrong && <p id={`pwerr-${q.id}`} role="alert" className="mt-1.5 text-[13px] text-danger">{q.error}</p>}
-          {q.status === 'error' && <p role="alert" className="note bad mt-2">{q.error}</p>}
+          {q.passwordWrong && <p id={`pwerr-${q.id}`} role="alert" className="m-0 mt-1.5 text-[13px] text-danger">{q.error}</p>}
+          {q.status === 'error' && <p role="alert" className="m-0 mt-1 text-sm text-danger">{q.error}</p>}
         </li>
       ))}
     </ul>
@@ -78,38 +83,33 @@ export function SampleList() {
 }
 
 const FACTS = [
-  { icon: <Shield />, title: 'Stays on your device', body: 'Read in a Web Worker. The page cannot make network requests.' },
-  { icon: <Check />, title: 'Proven, not guessed', body: 'Opening + movements = closing, with a check on every running balance.' },
-  { icon: <Upload />, title: 'Export anywhere', body: 'QuickBooks QBO, OFX, Excel with a proof sheet, or CSV.' },
+  { title: 'Stays on your device', body: 'Read in a Web Worker. The page cannot make network requests.' },
+  { title: 'Proven, not guessed', body: 'Opening + movements = closing, with a check on every running balance.' },
+  { title: 'Export anywhere', body: 'QuickBooks QBO, OFX, Excel with a proof sheet, or CSV.' },
 ];
 
 export function EmptyState() {
   return (
-    <div className="empty-hero flex-1">
-      <div className="site-container grid max-w-3xl gap-8 py-10 md:py-14">
-        <header className="grid gap-3 text-center">
-          <span className="chip mx-auto"><Shield /> Private by design · works offline</span>
-          <h1 className="display text-[clamp(30px,4.6vw,48px)]">Drop in a statement. Get a proof, then your export.</h1>
-          <p className="muted mx-auto m-0 max-w-xl text-lg">LedgerLocal reads bank and credit-card PDFs in your browser, checks the arithmetic against the printed balances, and exports QBO, OFX, Excel or CSV.</p>
-        </header>
+    <div className="start">
+      <header className="start-head">
+        <h1 className="display">Convert a statement, with the proof.</h1>
+        <p className="muted m-0 max-w-2xl">LedgerLocal reads bank and credit-card PDFs in your browser, checks the arithmetic against the printed balances, and exports QBO, OFX, Excel or CSV.</p>
+      </header>
+      <div className="start-grid">
         <DropZone />
-        <QueueList />
-        <div className="panel flex flex-wrap items-center gap-3 p-4">
-          <div className="min-w-[220px] flex-1"><strong>No statement handy?</strong><div className="muted text-sm">Try a bundled synthetic statement (fictional bank) from start to finish.</div></div>
+        <aside className="panel start-side" aria-label="Samples">
+          <strong>No statement handy?</strong>
+          <p className="hint m-0">Try a bundled synthetic statement (fictional bank) from start to finish.</p>
           <button className="btn btn-primary" data-testid="try-sample" onClick={() => { void loadSampleById('bank-clean'); }}>Try a sample statement</button>
           <button className="btn" onClick={() => openDialog('samples')}>More samples</button>
-        </div>
-        <ul className="m-0 grid list-none gap-3 p-0 sm:grid-cols-3">
-          {FACTS.map((f) => (
-            <li key={f.title} className="card grid content-start gap-1.5 p-4">
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent-soft text-accent">{f.icon}</span>
-              <strong>{f.title}</strong>
-              <span className="muted text-sm">{f.body}</span>
-            </li>
-          ))}
-        </ul>
-        <p className="muted m-0 text-center text-[13px]">Not financial advice. Always verify exports before filing or importing.</p>
+        </aside>
       </div>
+      <QueueList />
+      <ul className="facts">
+        {FACTS.map((f) => (
+          <li key={f.title}><strong>{f.title}</strong><span className="hint">{f.body}</span></li>
+        ))}
+      </ul>
     </div>
   );
 }

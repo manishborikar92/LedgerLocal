@@ -2,10 +2,10 @@
   "pages": 101,
   "rows": 4300,
   "pdfKB": 282,
-  "workerParseToReconciledMs": 2782,
-  "appLoadToInteractiveMs": 828,
-  "maxMainThreadFrameLatencyMsDuringParse": 65,
-  "longTasksOver50ms": 4,
-  "maxLongTaskMs": 115,
+  "workerParseToReconciledMs": 3508,
+  "appLoadToInteractiveMs": 486,
+  "maxMainThreadFrameLatencyMsDuringParse": 31,
+  "longTasksOver50ms": 3,
+  "maxLongTaskMs": 164,
   "browser": "Chromium 153.0.8010.12 (Playwright), 1 CPU sandbox"
 }

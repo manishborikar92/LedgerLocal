@@ -5,6 +5,7 @@ import type { ColumnDef, ColumnRole, Row } from '@/core/model';
 import type { ReconcileResult } from '@/core/reconcile';
 import { focusRow, reattachPdf, reparseWith, setColumnMode, store, type Doc } from '@/ui/state';
 import { useSel } from '@/ui/state/create-store';
+import { ChevronLeft, ChevronRight, Columns, Minus, Plus } from '@/ui/primitives/icons';
 
 type Kind = 'date' | 'desc' | 'amount' | 'balance';
 interface Box { key: string; rowId: string; kind: Kind; page: number; x: number; y: number; w: number; h: number }
@@ -54,9 +55,9 @@ export function PdfPane({ doc, rec }: { doc: Doc; rec: ReconcileResult }) {
   useEffect(() => {
     const el = stageRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => setWidth(Math.max(260, el.clientWidth - 28)));
+    const ro = new ResizeObserver(() => setWidth(Math.max(260, el.clientWidth - 32)));
     ro.observe(el);
-    setWidth(Math.max(260, el.clientWidth - 28));
+    setWidth(Math.max(260, el.clientWidth - 32));
     return () => ro.disconnect();
   }, []);
 
@@ -110,7 +111,7 @@ export function PdfPane({ doc, rec }: { doc: Doc; rec: ReconcileResult }) {
       <div className="pdfstage grid place-items-center text-center">
         <div className="max-w-sm">
           <h3 className="mb-2 text-xl">Source PDF not on this device</h3>
-          <p className="muted">Saved projects keep rows, not PDFs (unless you opted in). Attach the original PDF to see the highlighted audit trail. It is verified against the stored fingerprint and never uploaded.</p>
+          <p className="muted mb-4">Saved projects keep rows, not PDFs (unless you opted in). Attach the original PDF to see the highlighted audit trail. It is verified against the stored fingerprint and never uploaded.</p>
           <label className="btn btn-primary cursor-pointer">
             Attach the original PDF
             <input type="file" accept="application/pdf,.pdf" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) void reattachPdf(f); }} />
@@ -123,17 +124,18 @@ export function PdfPane({ doc, rec }: { doc: Doc; rec: ReconcileResult }) {
   return (
     <>
       <div className="toolbar" role="toolbar" aria-label="PDF controls">
-        <button className="btn btn-sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} aria-label="Previous page">‹</button>
-        <span className="num" aria-live="polite">Page {page} of {pages}</span>
-        <button className="btn btn-sm" onClick={() => setPage((p) => Math.min(pages, p + 1))} disabled={page >= pages} aria-label="Next page">›</button>
-        <button className="btn btn-sm" onClick={() => setZoom((z) => Math.max(0.5, +(z - 0.25).toFixed(2)))} aria-label="Zoom out">−</button>
-        <span className="num min-w-[42px] text-center">{Math.round(zoom * 100)}%</span>
-        <button className="btn btn-sm" onClick={() => setZoom((z) => Math.min(2.5, +(z + 0.25).toFixed(2)))} aria-label="Zoom in">+</button>
+        <button className="btn btn-sm btn-icon" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1} aria-label="Previous page"><ChevronLeft /></button>
+        <span className="num pg" aria-live="polite">Page {page} of {pages}</span>
+        <button className="btn btn-sm btn-icon" onClick={() => setPage((p) => Math.min(pages, p + 1))} disabled={page >= pages} aria-label="Next page"><ChevronRight /></button>
+        <span aria-hidden className="sep" />
+        <button className="btn btn-sm btn-icon" onClick={() => setZoom((z) => Math.max(0.5, +(z - 0.25).toFixed(2)))} aria-label="Zoom out"><Minus /></button>
+        <span className="num pg">{Math.round(zoom * 100)}%</span>
+        <button className="btn btn-sm btn-icon" onClick={() => setZoom((z) => Math.min(2.5, +(z + 0.25).toFixed(2)))} aria-label="Zoom in"><Plus /></button>
         <div className="spacer" />
-        <button className="btn btn-sm" aria-pressed={columnMode} onClick={() => setColumnMode(!columnMode)} disabled={!st.tables.length && !columnMode}>Column guides</button>
+        <button className="btn btn-sm" aria-pressed={columnMode} onClick={() => setColumnMode(!columnMode)} disabled={!st.tables.length && !columnMode} title="Move column borders and re-read the statement"><Columns /> <span className="lbl-wide">Column guides</span></button>
       </div>
       {columnMode && draft && (
-        <div className="note rounded-none">
+        <div className="note guides-panel">
           <strong>Column guides.</strong> Drag the red lines on the page to move column borders, set what each column is, then re-read. Applies to the whole statement.
           <div className="my-2 flex flex-wrap gap-1.5">
             {draft.map((c, i) => (
@@ -186,10 +188,10 @@ export function PdfPane({ doc, rec }: { doc: Doc; rec: ReconcileResult }) {
             </div>}
           </div>
         )}
-        {ready !== page && !err && <p className="muted" style={{ textAlign: 'center' }}>Rendering page…</p>}
-        <p className="muted" style={{ fontSize: 12, textAlign: 'center' }}>
-          Outlines: <b>solid blue</b> date · <b>dotted grey</b> description · <b>thick green</b> amount · <b>dashed purple</b> balance · <b>red fill</b> running-balance mismatch.
-        </p>
+        {ready !== page && !err && <p className="muted m-0 mt-3 text-center">Rendering page…</p>}
+        <ul className="legend" aria-label="What the outlines on the page mean">
+          <li><i /> date</li><li><i className="k-desc" /> description</li><li><i className="k-amount" /> amount</li><li><i className="k-balance" /> balance</li><li><i className="k-bad" /> running-balance mismatch</li>
+        </ul>
       </div>
     </>
   );

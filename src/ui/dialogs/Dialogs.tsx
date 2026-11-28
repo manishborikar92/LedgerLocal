@@ -6,13 +6,13 @@ import { ProjectsDialog } from './ProjectsDialog';
 import { BalancesDialog, PrivacyDialog, SamplesDialog, ShortcutsDialog, SplitDialog, WipeDialog } from './SimpleDialogs';
 
 /** Renders whichever dialog the store says is open (one at a time). */
-export function Dialogs() {
+export function Dialogs({ networkBlocked }: { networkBlocked: boolean }) {
   const open = useSel(store, (s) => s.dialog);
   switch (open) {
     case 'export': return <ExportDialog />;
     case 'projects': return <ProjectsDialog />;
     case 'wipe': return <WipeDialog />;
-    case 'privacy': return <PrivacyDialog />;
+    case 'privacy': return <PrivacyDialog networkBlocked={networkBlocked} />;
     case 'balances': return <BalancesDialog />;
     case 'split': return <SplitDialog />;
     case 'shortcuts': return <ShortcutsDialog />;

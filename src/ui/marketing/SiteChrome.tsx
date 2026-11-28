@@ -18,12 +18,12 @@ export async function SiteHeader() {
       <div className="site-container">
         <a href={withBase('/')} className="brand" aria-label="LedgerLocal home"><Logo /> LedgerLocal</a>
         <nav className="site-nav ml-auto" aria-label="Primary">
-          <span className="hidden items-center gap-1 md:flex">
+          <span className="hidden items-center gap-0.5 md:flex">
             {NAV.map((n) => <a key={n.href} href={withBase(n.href)}>{n.label}</a>)}
           </span>
           {/* Server Action form: works with JavaScript disabled. */}
           <form action={cycleTheme} className="ml-1">
-            <button type="submit" className="btn btn-quiet btn-sm" aria-label={`Theme: ${theme}. Click to change`} title={`Theme: ${theme}`}>
+            <button type="submit" className="btn btn-quiet btn-icon" aria-label={`Theme: ${theme}. Click to change`} title={`Theme: ${theme}`}>
               {theme === 'light' ? <Sun /> : theme === 'dark' ? <Moon /> : <Monitor />}
             </button>
           </form>
@@ -37,7 +37,7 @@ export async function SiteHeader() {
 export function SiteFooter() {
   return (
     <footer className="site-footer">
-      <div className="site-container grid gap-6 py-10 md:grid-cols-[1.4fr_1fr_1fr]">
+      <div className="site-container grid gap-8 py-10 md:grid-cols-[1.5fr_1fr_1fr]">
         <div className="grid content-start gap-2">
           <a href={withBase('/')} className="brand"><Logo size={24} /> LedgerLocal</a>
           <p className="muted m-0 max-w-sm text-sm">Statement PDFs to QBO, OFX, Excel and CSV. Reconciled, private, and entirely in your browser.</p>

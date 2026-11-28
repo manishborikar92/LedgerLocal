@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { currencyExponent, formatMinor } from '@/core/money';
 import { Dialog } from '@/ui/primitives/Dialog';
 import { SampleList } from '@/ui/import/ImportPanel';
@@ -16,14 +16,12 @@ export function WipeDialog() {
   );
 }
 
-export function PrivacyDialog() {
-  const [csp, setCsp] = useState<boolean | null>(null);
-  useEffect(() => setCsp(!!document.querySelector('meta[http-equiv="Content-Security-Policy"]')), []);
+export function PrivacyDialog({ networkBlocked: csp }: { networkBlocked: boolean }) {
   return (
     <Dialog open onClose={closeDialog} title="Verify it is offline" footer={<button className="btn" onClick={closeDialog}>Close</button>}>
       {csp
         ? <div className="note ok"><strong>Enforced by your browser:</strong> this page&apos;s Content-Security-Policy says <code>connect-src &apos;none&apos;</code>, so scripts here cannot make network requests at all (no fetch, XHR, WebSocket or beacon). Nothing can be uploaded.</div>
-        : <div className="note warn">No Content-Security-Policy is present (development build). Production builds add a strict policy; see the README.</div>}
+        : <div className="note warn">The server did not send a policy that blocks network requests with this page. Production builds served by <code>next start</code> do; see the README.</div>}
       <h3 className="text-base">Check it yourself</h3>
       <ol className="m-0 grid gap-1.5">
         <li>Open your browser&apos;s developer tools → <strong>Network</strong>, clear the list, then import a statement. No request appears.</li>

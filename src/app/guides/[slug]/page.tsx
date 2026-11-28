@@ -31,10 +31,10 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
     <>
       <SiteHeader />
       <main id="main" className="site-container py-12">
-        <nav aria-label="Breadcrumb" className="mb-6 text-sm"><a href={withBase('/guides/')}>← All guides</a></nav>
+        <nav aria-label="Breadcrumb" className="mb-6 text-sm"><a href={withBase('/guides/')}>All guides</a></nav>
         <article className="prose">
           <h1 className="display text-[clamp(32px,4.2vw,46px)]">{g.title}</h1>
-          <p className="muted text-xl">{g.lede}</p>
+          <p className="lede">{g.lede}</p>
           {g.sections.map((s) => (
             <section key={s.h}>
               <h2>{s.h}</h2>
@@ -42,7 +42,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
             </section>
           ))}
         </article>
-        <p className="mt-10"><a className="btn btn-primary" href={withBase('/app/#sample')}>Try it with a sample statement</a></p>
+        <p className="mt-10"><a className="btn btn-primary btn-lg" href={withBase('/app/#sample')}>Try it with a sample statement</a></p>
         <p className="muted mt-4 text-sm">Not financial advice. Verify exports before filing or importing.</p>
       </main>
       <SiteFooter />

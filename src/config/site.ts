@@ -17,7 +17,7 @@ export const SITE = {
   description: 'Convert bank and credit-card statement PDFs to QuickBooks QBO, OFX, Excel and CSV entirely in your browser. Every file is reconciled against its printed balances and nothing is uploaded.',
   shortDescription: 'Offline bank-statement PDF converter with balance reconciliation.',
   keywords: ['bank statement converter', 'PDF to QBO', 'PDF to OFX', 'bank statement to Excel', 'bank statement to CSV', 'offline', 'privacy', 'reconciliation', 'QuickBooks import', 'bookkeeping'],
-  themeColor: { light: '#f6f7f9', dark: '#0a0c11' },
+  themeColor: { light: '#ffffff', dark: '#14171e' },
 } as const;
 
 /** Social card (src/app/opengraph-image.png). Pages that set their own openGraph must repeat it: Next replaces, not merges, the parent's images. */

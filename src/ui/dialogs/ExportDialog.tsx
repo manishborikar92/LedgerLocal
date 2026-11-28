@@ -44,17 +44,17 @@ export function ExportDialog() {
       <button className="btn btn-primary" data-testid="do-export" disabled={busy || !rows || (unreconciled.length > 0 && !allowUnreconciled)} onClick={run}>{busy ? 'Exporting…' : 'Export'}</button>
     </>}>
       <fieldset className="m-0 border-0 p-0">
-        <legend className="mb-2 font-semibold">Format</legend>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-2">
+        <legend className="mb-2 text-sm font-semibold">Format</legend>
+        <div className="grid grid-cols-2 gap-2">
           {FORMATS.map((f) => (
-            <label key={f.id} className="panel cursor-pointer p-3" style={format === f.id ? { outline: '2px solid var(--accent)' } : undefined}>
+            <label key={f.id} className="choice">
               <input type="radio" name="fmt" checked={format === f.id} onChange={() => setFormat(f.id)} /> <strong>{f.label}</strong>
-              <div className="muted text-[13px]">{f.hint}</div>
+              <div className="hint">{f.hint}</div>
             </label>
           ))}
         </div>
       </fieldset>
-      <p className="m-0">Exporting <strong>{included.length}</strong> statement{included.length === 1 ? '' : 's'} · <strong>{rows}</strong> rows.</p>
+      <p className="m-0 num">Exporting <strong>{included.length}</strong> statement{included.length === 1 ? '' : 's'} · <strong>{rows}</strong> rows.</p>
       {unreconciled.length > 0 && (
         <div className="note bad" role="alert">
           <strong>{unreconciled.length === 1 ? 'This statement does not reconcile' : `${unreconciled.length} statements do not reconcile`}.</strong> {unreconciled.map((d) => d.statement.fileName).join(', ')}. Review the red status first.

@@ -8,7 +8,7 @@ export function Toast() {
   const tone = notice.kind === 'error' ? 'bad' : notice.kind === 'success' ? 'ok' : '';
   return (
     <div className="toast">
-      <div className={`note ${tone} shadow-lg`} role={notice.kind === 'error' ? 'alert' : 'status'}>{notice.text}</div>
+      <div className={`note ${tone}`} role={notice.kind === 'error' ? 'alert' : 'status'}>{notice.text}</div>
     </div>
   );
 }

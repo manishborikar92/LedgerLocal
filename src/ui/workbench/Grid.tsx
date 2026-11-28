@@ -22,10 +22,23 @@ export function Grid({ doc, rec, showPayee }: { doc: Doc; rec: ReconcileResult; 
   const [col, setCol] = useState(2);
   const [edit, setEdit] = useState<{ rowId: string; col: ColId; value: string; error?: string } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
   const wantFocus = useRef(false);
-  const v = useVirtualizer({ count: rows.length, getScrollElement: () => scrollRef.current, estimateSize: () => 34, overscan: 10 });
+  const [rowH, setRowH] = useState(32);
+  const v = useVirtualizer({ count: rows.length, getScrollElement: () => scrollRef.current, estimateSize: () => rowH, overscan: 10 });
   const activeIdx = rows.findIndex((r) => r.id === focusRowId);
 
+  // The stylesheet owns the row height (--row-h: compact, touch, or two-line in a narrow pane); read it so the virtual list agrees.
+  useEffect(() => {
+    const wrap = scrollRef.current;
+    if (!wrap) return;
+    const read = () => { const h = parseFloat(getComputedStyle(gridRef.current ?? wrap).getPropertyValue('--row-h')); if (h > 0) setRowH(h); };
+    read();
+    const ro = new ResizeObserver(read);
+    ro.observe(wrap);
+    return () => ro.disconnect();
+  }, [showPayee, rows.length > 0]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { v.measure(); }, [rowH]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (activeIdx >= 0) v.scrollToIndex(activeIdx, { align: 'auto' }); }, [focusRowId]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (wantFocus.current && !edit && focusRowId) {
@@ -91,10 +104,10 @@ export function Grid({ doc, rec, showPayee }: { doc: Doc; rec: ReconcileResult; 
 
   if (!rows.length) {
     return (
-      <div className="gridwrap" style={{ display: 'grid', placeItems: 'center', padding: 24, textAlign: 'center' }}>
-        <div style={{ maxWidth: 420 }}>
-          <h3 style={{ fontSize: 20, marginBottom: 8 }}>No transactions were read</h3>
-          <p className="muted">The PDF has text, but no transaction table was recognised. Open the column guides on the PDF side to mark the columns, or add rows by hand.</p>
+      <div className="grid-empty">
+        <div className="grid max-w-md justify-items-center gap-3">
+          <h3 className="text-xl">No transactions were read</h3>
+          <p className="muted m-0">The PDF has text, but no transaction table was recognised. Open the column guides on the PDF side to mark the columns, or add rows by hand.</p>
           <button className="btn" onClick={insertRowBelow}>Add a row</button>
         </div>
       </div>
@@ -103,10 +116,10 @@ export function Grid({ doc, rec, showPayee }: { doc: Doc; rec: ReconcileResult; 
 
   return (
     <div className="gridwrap" ref={scrollRef}>
-      <div className="data-grid" role="grid" aria-label={`Transactions in ${st.fileName}`} aria-rowcount={rows.length + 1} aria-colcount={cols.length} aria-multiselectable="true" onKeyDown={onKeyDown}>
-        <div role="row" aria-rowindex={1} className={`grid-row head ${showPayee ? 'payee' : ''}`}>
+      <div ref={gridRef} className={`data-grid ${showPayee ? 'has-payee' : ''}`} role="grid" aria-label={`Transactions in ${st.fileName}`} aria-rowcount={rows.length + 1} aria-colcount={cols.length} aria-multiselectable="true" onKeyDown={onKeyDown}>
+        <div role="row" aria-rowindex={1} className="grid-row head">
           {cols.map((c, ci) => (
-            <div key={c} role="columnheader" aria-colindex={ci + 1} className={`gcell ${c === 'amount' || c === 'balance' ? 'r' : ''} ${c === 'tick' ? 'margin' : ''}`}>
+            <div key={c} role="columnheader" aria-colindex={ci + 1} data-col={c} className={`gcell ${c === 'amount' || c === 'balance' ? 'r' : ''}`}>
               {c === 'check' ? <span className="sr-only">Select</span> : c === 'tick' ? <span className="sr-only">Running balance check</span> : c === 'balance' ? <span title="Running balance as printed on the statement">{HEAD[c]}<span className="sr-only"> (as printed)</span></span> : HEAD[c]}
             </div>
           ))}
@@ -118,22 +131,22 @@ export function Grid({ doc, rec, showPayee }: { doc: Doc; rec: ReconcileResult; 
             const sel = r.id === focusRowId;
             const isChecked = checked.includes(r.id);
             return (
-              <div key={r.id} role="row" aria-rowindex={vi.index + 2} aria-selected={sel || isChecked} data-row-id={r.id} className={`grid-row ${showPayee ? 'payee' : ''} ${chk === 'bad' ? 'bad' : ''}`} style={{ position: 'absolute', top: 0, left: 0, right: 0, transform: `translateY(${vi.start}px)` }}>
+              <div key={r.id} role="row" aria-rowindex={vi.index + 2} aria-selected={sel || isChecked} data-row-id={r.id} className={`grid-row ${chk === 'bad' ? 'bad' : ''}`} style={{ position: 'absolute', top: 0, left: 0, right: 0, transform: `translateY(${vi.start}px)` }}>
                 {cols.map((c, ci) => {
                   const active = sel && cols[col] === c;
                   const tabStop = (activeIdx < 0 ? vi.index === 0 : sel) && cols[col] === c;
                   const editing = edit?.rowId === r.id && edit.col === c;
-                  const common = { role: 'gridcell' as const, id: `c-${r.id}-${c}`, 'aria-colindex': ci + 1, tabIndex: tabStop ? 0 : -1, 'data-active': active };
+                  const common = { role: 'gridcell' as const, id: `c-${r.id}-${c}`, 'aria-colindex': ci + 1, tabIndex: tabStop ? 0 : -1, 'data-active': active, 'data-col': c };
                   const select = () => { setCol(ci); focusRow(r.id); };
-                  if (c === 'check') return <div key={c} {...common} className="gcell" onClick={() => { select(); toggleChecked(r.id); }}><span role="checkbox" aria-checked={isChecked} aria-label={`Select row ${vi.index + 1}`}>{isChecked ? '☑' : '☐'}</span></div>;
+                  if (c === 'check') return <div key={c} {...common} className="gcell" onClick={() => { select(); toggleChecked(r.id); }}><span role="checkbox" aria-checked={isChecked} aria-label={`Select row ${vi.index + 1}`} className="cb" /></div>;
                   if (c === 'tick') return (
-                    <div key={c} {...common} className="gcell margin" onClick={select} title={chk === 'ok' ? 'Running balance matches' : chk === 'bad' ? 'Running balance does NOT match from this row' : 'No printed balance to check'}>
+                    <div key={c} {...common} className="gcell" onClick={select} title={chk === 'ok' ? 'Running balance matches' : chk === 'bad' ? 'Running balance does NOT match from this row' : 'No printed balance to check'}>
                       <span className={`tickmark ${chk}`} aria-label={chk === 'ok' ? 'Running balance verified' : chk === 'bad' ? 'Running balance mismatch' : 'Not checked'}>{chk === 'ok' ? '✓' : chk === 'bad' ? '✗' : '–'}</span>
                     </div>
                   );
                   if (editing) {
                     return (
-                      <div key={c} {...common} className="gcell" style={{ padding: 0 }}>
+                      <div key={c} {...common} className="gcell !p-0">
                         <input autoFocus aria-label={`Edit ${HEAD[c]}`} aria-invalid={!!edit.error} aria-describedby={edit.error ? 'cell-err' : undefined} value={edit.value} onChange={(e) => setEdit({ ...edit, value: e.target.value, error: undefined })}
                           onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); commit('down'); } else if (e.key === 'Tab') { e.preventDefault(); commit('right'); } else if (e.key === 'Escape') { e.preventDefault(); setEdit(null); wantFocus.current = true; } }}
                           onBlur={() => { if (!edit.error) commit('none'); else setEdit(null); }} />
@@ -142,12 +155,13 @@ export function Grid({ doc, rec, showPayee }: { doc: Doc; rec: ReconcileResult; 
                     );
                   }
                   const right = c === 'amount' || c === 'balance';
-                  const val = c === 'amount' ? formatMinor(r.amountMinor, { exp }) : c === 'balance' ? (r.balanceMinor == null ? '' : formatMinor(r.balanceMinor, { exp })) : text(r, c);
+                  // display only: a true minus sign lines up with the digits; edits and exports keep the ASCII hyphen
+                  const val = c === 'amount' ? formatMinor(r.amountMinor, { exp }).replace(/^-/, '−') : c === 'balance' ? (r.balanceMinor == null ? '' : formatMinor(r.balanceMinor, { exp }).replace(/^-/, '−')) : text(r, c);
                   const flags = c === 'description' ? (r.flags ?? []).filter((f) => FLAG_LABEL[f]) : [];
                   return (
-                    <div key={c} {...common} className={`gcell ${right ? 'r num' : ''} ${c === 'amount' && r.amountMinor < 0 ? 'neg' : ''}`} onClick={select} onDoubleClick={() => startEdit(r, c)} title={c === 'description' ? r.description : undefined}>
+                    <div key={c} {...common} className={`gcell ${right ? 'r num' : ''}`} onClick={select} onDoubleClick={() => startEdit(r, c)} title={c === 'description' ? r.description : undefined}>
                       {val}
-                      {flags.map((f) => <span key={f} className="chip" style={{ fontSize: 11, padding: '0 6px', marginLeft: 8 }}>{FLAG_LABEL[f]}</span>)}
+                      {flags.map((f) => <span key={f} className="chip">{FLAG_LABEL[f]}</span>)}
                     </div>
                   );
                 })}
@@ -156,7 +170,7 @@ export function Grid({ doc, rec, showPayee }: { doc: Doc; rec: ReconcileResult; 
           })}
         </div>
       </div>
-      {edit?.error && <div className="note bad" role="alert" style={{ position: 'sticky', bottom: 0 }}>{edit.error}</div>}
+      {edit?.error && <div className="note bad grid-error" role="alert">{edit.error}</div>}
     </div>
   );
 }

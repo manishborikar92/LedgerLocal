@@ -18,7 +18,7 @@ const Dialogs = dynamic(() => import('@/ui/dialogs/Dialogs').then((m) => m.Dialo
 const never = () => () => {};
 const VIEWS = [['work', 'Workbench'], ['ledger', 'Merged ledger'], ['rules', 'Payees & rules']] as const;
 
-export function AppShell({ initialTheme }: { initialTheme: ThemePreference }) {
+export function AppShell({ initialTheme, networkBlocked }: { initialTheme: ThemePreference; networkBlocked: boolean }) {
   const hasDocs = useSel(store, (s) => s.docs.length > 0);
   const view = useSel(store, (s) => s.view);
   const online = useSel(store, (s) => s.online);
@@ -59,9 +59,9 @@ export function AppShell({ initialTheme }: { initialTheme: ThemePreference }) {
         <div className="spacer" />
         {!online && <span className="chip chip-warning" role="status">Offline · everything still works</span>}
         {online && offlineReady && <span className="chip hidden md:inline-flex" data-testid="offline-ready" title="The app and PDF engine are cached; it works without a connection">Ready offline</span>}
-        <button className="chip chip-success" onClick={() => openDialog('privacy')} data-testid="privacy-chip" title="How to verify nothing is uploaded"><Shield /> 0 bytes uploaded</button>
-        <button className="btn btn-sm btn-quiet" onClick={cycle} aria-label={`Theme: ${mode}. Click to change`} title={`Theme: ${mode}`}>{mode === 'light' ? <Sun /> : mode === 'dark' ? <Moon /> : <Monitor />}</button>
-        <button className="btn btn-sm btn-quiet" onClick={() => openDialog('shortcuts')} aria-label="Help and keyboard shortcuts"><Help /></button>
+        <button className="chip chip-success" onClick={() => openDialog('privacy')} data-testid="privacy-chip" aria-label="0 bytes uploaded. How to verify it" title="How to verify nothing is uploaded"><Shield /> <span className="hidden sm:inline">0 bytes uploaded</span></button>
+        <button className="btn btn-sm btn-quiet btn-icon" onClick={cycle} aria-label={`Theme: ${mode}. Click to change`} title={`Theme: ${mode}`}>{mode === 'light' ? <Sun /> : mode === 'dark' ? <Moon /> : <Monitor />}</button>
+        <button className="btn btn-sm btn-quiet btn-icon" onClick={() => openDialog('shortcuts')} aria-label="Help and keyboard shortcuts" title="Help and keyboard shortcuts"><Help /></button>
       </header>
       {unsupported && <div className="note bad m-3" role="alert" data-testid="unsupported-browser">{UNSUPPORTED_BROWSER_MESSAGE}</div>}
       <main id="main" className={`flex min-h-0 flex-1 flex-col ${hasDocs && view === 'work' ? 'overflow-hidden' : 'overflow-auto'}`}>
@@ -70,7 +70,7 @@ export function AppShell({ initialTheme }: { initialTheme: ThemePreference }) {
       <footer className="no-print muted border-t border-line bg-surface px-4 py-1.5 text-xs">
         Not financial advice. Verify exports before filing or importing. Accuracy figures in the docs are measured on synthetic layouts only.
       </footer>
-      {dialogOpen && <Dialogs />}
+      {dialogOpen && <Dialogs networkBlocked={networkBlocked} />}
       <Toast />
       <ServiceWorker />
     </div>

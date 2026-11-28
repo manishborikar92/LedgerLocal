@@ -1,1 +1,1 @@
-LedgerLocal: statement PDFs, reconciled and ready for your books. A RECONCILED stamp with a short ledger of verified rows; nothing is uploaded.
+LedgerLocal: statement PDFs, reconciled and ready for your books. A RECONCILED stamp above the arithmetic proof and a short ledger of ticked rows; nothing is uploaded.

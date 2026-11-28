@@ -51,3 +51,40 @@ W3C ARIA Authoring Practices [data-grid examples](https://www.w3.org/WAI/ARIA/ap
 
 ## 8. Name check
 "LedgerLocal": no exact-match product found in a web search; the "Ledger*" namespace is crowded (Ledger CLI, Ledger Book, LedgerLite, the Ledger hardware-wallet company) ([Wikipedia: Ledger (software)](https://en.wikipedia.org/wiki/Ledger_(software))). This is **not a trademark clearance**; do a USPTO/WIPO/national registry search before investing in branding.
+
+## 9. Visual redesign research (26 November 2026)
+Tags as above. **[verified]** = run or read here in this session; **[source]** = read on the page named; **[unverified]** = not confirmed. Search results were used to find primary pages; the product comparison is deliberately thin: **no shipping accounting product's UI was surveyed in this pass** (earlier "Stripe/Linear/Vercel/Mercury" comparisons in AUDIT.md §2 remain general familiarity, [unverified]).
+
+### 9.1 Which modern CSS is safe on the support floor (Chrome/Edge 145, Firefox 144, Safari/iOS 26.2) [verified]
+Method: `@mdn/browser-compat-data` 8.1.10 (MDN's own dataset) and the `web-features` package, installed outside the repository and queried by script for the first stable version of each feature without a flag, prefix or partial-implementation note; the script and its raw output were not committed (they are a one-off, rerunnable in minutes). Everything below was compared with the floor.
+| Used in the redesign | First support (Chrome / Firefox / Safari) | Notes |
+|---|---|---|
+| Cascade layers `@layer` | 99 / 97 / 15.4 | already in use |
+| `light-dark()` | 123 / 120 / 17.5 | one palette definition per colour; `color-scheme` selects the side |
+| `color-mix()`, `oklch()` | 111 / 113 / 16.2, 15.4 | tints for borders and status fills; colour authored in OKLCH, shipped as hex |
+| Container queries (`@container`, `container-type`) | 105 / 110 / 16 | each pane and the grid respond to their own width, which the splitter changes |
+| `:has()` | 105 / 121 / 15.4 | radio/checkbox tiles without JavaScript, toolbar label collapse |
+| CSS nesting | 120 / 117 / 17.2 | available; the stylesheets use it sparingly |
+| `@starting-style` | 117 / 129 / 17.5 | dialog and toast entrance only (no exit animation: `transition-behavior` is partial in Firefox 129) |
+| `scrollbar-color` | 121 / 64 / 26.2 | exactly at the floor on Safari |
+| `dvh`, `forced-colors`, `prefers-contrast`, `prefers-reduced-motion`, `:focus-visible`, `accent-color` | all at or below floor | |
+| `text-wrap: balance` | 130 / 124 / 17.5 | |
+| `text-wrap: pretty` | 130 / **none** / 26 | used as progressive enhancement only (Firefox ignores it; nothing depends on it) |
+| **Not used** (not at the floor in at least one browser) | | `@scope` (Firefox 146, Safari 26.4), anchor positioning (Firefox 147), `field-sizing` (Firefox 152), `text-box-trim` (Firefox 154), `corner-shape`, `contrast-color()`, scroll-driven animations (Firefox 159), `interpolate-size`, `transition-behavior` (Firefox partial) |
+Same-document **view transitions** are at the floor (Firefox 144 shipped them; web.dev "Baseline newly available" on 14 Oct 2025 [source: web.dev/blog/same-document-view-transitions-are-now-baseline-newly-available]; BCD agrees [verified]), but they are **not used**: the workbench swaps views with a React state change over a virtualised list, and a cross-fade there adds motion without telling the person anything new.
+`web-features` marks `light-dark()` and `text-wrap: balance` widely available only from 2026-11-13, i.e. two weeks before this work; both are far below the floor, so that date does not affect support.
+
+### 9.2 Colour and status [source]
+* WCAG 2.2 **1.4.1 Use of Color**: colour must not be the only visual means of conveying information ([Understanding SC 1.4.1](https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html)). Every status here has a glyph or a line style as well as colour (✓/✗/– in the tick margin, the stamp's wording, outline styles on the PDF).
+* **1.4.11 Non-text Contrast**: user-interface components and graphical objects need 3:1 against adjacent colours, and thin lines should be avoided or exceed the minimum because anti-aliasing lowers the effective contrast ([Understanding SC 1.4.11](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast)). Consequence: control borders use a 3:1 token (`--border-strong`), PDF outlines are at least 1 px and drawn in colours measured against white paper, and decorative hairlines use a separate lighter token that carries no information.
+* Stripe documents building its palette in a perceptually uniform colour space so that equal lightness gives equal contrast across hues ([Designing accessible color systems](https://stripe.com/blog/accessible-color-systems)); Linear describes deriving themes from a few variables (base, accent, contrast) in LCH rather than hand-tuning 98 values ([How we redesigned the Linear UI](https://linear.app/blog/how-we-redesigned-the-linear-ui)). Consequence here: the palette is authored in OKLCH, shipped as hex pairs inside `light-dark()`, and *measured* (`tools/check-contrast.ts`, a Vitest guard) rather than trusted. [Both pages were read as search excerpts, not in full.]
+
+### 9.3 Data-table density [source]
+IBM Carbon's data-table style page defines five row heights (24, 32, 40, 48, 64 px), says the header row should match the row size, recommends the densest sizes "for highly dense layouts where maximizing information within limited space is a priority", and says row hover should always be enabled because it helps scanning even when rows are not interactive ([style](https://carbondesignsystem.com/components/data-table/style), [usage](https://carbondesignsystem.com/components/data-table/usage/)). Consequence: 32 px rows with hover for fine pointers (the old rows were 36 px); 44 px for coarse pointers, above the WCAG 2.5.8 24 px minimum cited in AUDIT.md §2; a taller two-line row in narrow panes instead of squeezing four columns into 370 px.
+
+### 9.4 Split panes [source]
+The W3C ARIA Authoring Practices **window splitter** pattern: a focusable `separator` with `aria-valuenow`/`min`/`max`, `aria-controls` pointing at the primary pane, arrow keys moving it, Home/End jumping to the extremes (optional) and Enter collapsing (optional) ([APG](https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter)). The old splitter lacked `aria-controls` and Home/End; both were added. Enter-to-collapse was not (the pane range is 25–75%).
+
+### 9.5 Not researched in this pass [unverified]
+Mobile patterns for dense financial tables beyond the Carbon guidance above, dark-mode contrast practice beyond the measured pairs, and how shipping accounting products lay out reconciliation. The two-line row layout, bottom-sheet dialogs and the Rows/PDF switch are design decisions checked against screenshots and axe, not against a survey.
+

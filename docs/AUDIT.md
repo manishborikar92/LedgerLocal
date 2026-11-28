@@ -69,3 +69,45 @@ Copy was reviewed so that every claim is true of the product: no unverified thir
 * Firefox/Safari and non-Linux platforms (including Windows) untested.
 * Turbopack was not re-tested as a production bundler (D-03).
 * The modern pdf.js build was exercised with the synthetic statements and the bundled samples in Chromium 153 only; the list of required browser features comes from removing each in that browser for the sample statement, and other PDF content might touch more. Firefox and Safari were never run.
+
+## 7. Visual redesign (26–27 November 2026)
+Tags: **[verified]** = run or measured in this session; **[unverified]** = not done. Screenshots come from `tools/shots.ts` (34 screens and states × light/dark × 1440 / 768 / 390 px); names below are `<viewport>/<theme>/<scenario>.png` in that tool's output folder (not shipped; re-create with the tool). Design rationale: DESIGN.md §8; decisions D-27 to D-34; research: RESEARCH.md §9.
+
+### 7.1 Baseline, re-measured before any UI edit [verified]
+`npm ci` 15 s, `npm audit` 0 vulnerabilities, typecheck and lint clean, Vitest 163/163, `npm run build` ok, Playwright 26/26 (1.4 min, against `next start`). The baseline build was kept and served alongside the new one for every A/B below.
+
+### 7.2 Gap analysis from the baseline screenshots [verified by looking; the six numbered items are what the redesign fixed]
+1. **Chrome ate the screen.** `1440/light/wb-reconciled`: about 300 of 900 px (top bar, a 65 px statement bar with a dashed "Add more PDFs" block, a ~105 px proof strip, a toolbar that wraps to two lines) before the first row; 14 rows visible. `390/light/wb-reconciled`: about 600 of 844 px; the grid got about 1.5 rows on the first screen.
+2. **Colour meant two things.** Every outflow was red (`1440/dark/wb-discrepancy`), so the one real error signal was diluted; the ledger margin rule was a 30 % danger red; PDF boxes used green for amounts and purple for balances.
+3. **The landing page was the generic kit.** `1440/light/landing`: eyebrow chip, gradient wash, window-frame mock with traffic-light dots, numbered cards, a bento of identical icon-tile cards; the mock was small and never showed the PDF-to-row audit trail.
+4. **First run and import queue.** `1440/light/empty`: three fact cards clipped under the footer at 1440×900, a marketing H1 repeated inside the app; `queue-errors`: stacked red boxes under a huge drop zone.
+5. **Phones.** `390/*/wb-reconciled`: four columns in 370 px left a 64 px description column (about nine characters); the proof strip wrapped with "Printed closing" orphaned; `390/*/view-ledger`: the Amount column was clipped.
+6. **Dialogs.** `1440/light/dlg-export-qbo`: the fourth format tile (CSV) alone on a second row; backdrop `blur(2px)` against the "no blur" lesson.
+Found in code and screenshots rather than by tests: **the "Verify it is offline" dialog told users of a production build "No Content-Security-Policy is present (development build)"** (`1440/light/dlg-privacy`, baseline): it looked for a `<meta http-equiv>` tag, a leftover from the static-export era, while the policy now arrives as an HTTP header. Fixed: the server passes whether this response's policy forbids network requests (`connect-src 'none'`, `form-action 'none'`) and E2E asserts the dialog. **The landing page's CSP excerpt** said "every page" with a `sha256` script source; the real policy is per route with a nonce and `strict-dynamic`. **Virtual rows overlapped by 2 px** (36 px rows at 34 px intervals). **The dark palette was defined twice.** **The splitter lacked `aria-controls` and Home/End.**
+Tablet (`768/*/wb-reconciled`): rows-only behind the Rows/PDF switch; kept on purpose (D-32).
+
+### 7.3 Defects I introduced and found in review, then fixed [verified]
+* **Landing page Total Blocking Time.** The stamp's entrance animation also played on the static landing illustration. Lighthouse desktop went from 100 to 95–99 (TBT 74–159 ms against 15–36 ms for the baseline, five alternating runs each) with identical JavaScript (the same chunk, `794-…js`, ran about twice as long in the trace). My own PerformanceObserver check did not reproduce it, which is why I localised it by editing the built CSS in place: with the animation removed, 5/5 runs scored 100 (TBT 14–41 ms). The animation is now scoped to the workbench. Lesson: Lighthouse is the reference here, and a decorative animation at load is not free.
+* **Merged ledger overlap on phones.** A container query cannot restyle its own container, so the narrow row height never applied and two-line rows were laid out at 34 px pitch. Caught only in the final screenshots; now asserted by E2E (34 px desktop, 54 px narrow).
+* Smaller: a toolbar wrapping at 1440, a numbered list that lost its numbers, a social card whose arithmetic ran off the edge, a disabled primary button that was invisible in dark mode, and a keyboard-walk test that started mid-page.
+
+### 7.4 Verification of the final build [verified unless stated]
+* Vitest 166/166 (163 + 3 design-token tests: 80 colour pairs ≥ 4.5:1 text / ≥ 3:1 UI in both themes, one palette definition, no remote `url()` in styles).
+* Playwright 36/36 on the production build: the original 26 unchanged (none weakened, none edited), plus `e2e/design.spec.ts` (10): colour roles, row pitch, window-splitter semantics, narrow layout, ledger row pitch, reduced motion, forced colours, focus ring and a keyboard walk across one full tab cycle (more than 25 distinct stops, each with a ≥ 2 px ring), the privacy dialog. axe (WCAG 2.0–2.2 A/AA) stays green in both themes on landing and workbench and on the phone viewport. All network/CSP E2E checks pass; no new external request of any kind; offline E2E passes.
+* `forced-colors` and `prefers-reduced-motion` were checked by emulation in Chromium only.
+* Browser support of every CSS feature used was checked against MDN's compat data (RESEARCH.md §9.1); it was **not** run in Firefox or Safari.
+
+### 7.5 Performance, A/B in one session [verified]
+Lighthouse 13.6, Chrome 153, one CPU, `next start`, baseline and new builds measured back to back per target (benchmark index 2496 and 2484), median of 3 runs (5 for the landing page on desktop and the workbench shell on mobile). Mobile is simulated slow 4G with 4× CPU slowdown.
+| Target | Baseline (perf, TBT) | Redesign (perf, TBT) |
+|---|---|---|
+| Landing, mobile | 90, 393 ms | 94, 286 ms |
+| Guide, mobile | 88, 462 ms | 91, 380 ms |
+| Workbench shell, mobile | 87, 511 ms | 93, 304 ms |
+| Landing / guide / workbench shell, desktop | 100 / 100 / 100 | 100 / 100 / 100 |
+Accessibility, Best Practices and SEO are 100 on every page for the redesign (SEO not measured on the intentionally `noindex` workbench). **Read the mobile column as "no regression", not "faster":** run-to-run ranges overlap (e.g. landing mobile baseline 81–91, redesign 91–96) and an earlier three-run set in this same session had the workbench shell *lower* on the redesign (84 against 88) before five runs showed 91 against 95; the shipped JavaScript is byte-identical. Raw runs: `docs/lighthouse.json` (redesign) .
+Size (gzip, `tools/bundle-report.mjs`): first-load JS unchanged (landing and guides 168.8 KB, workbench 212 KB); first-load CSS 8.7 → 11.5 KB (the one place the redesign costs bytes); offline install 1,395.4 → 1,398.4 KB gzip (44 files, unchanged count; the new UI is CSS and inline SVG only, no new fonts or images).
+
+### 7.6 Not verified
+Firefox and Safari rendering (support was checked from data, not by running them); a screen reader; real devices and touch (the 44 px coarse-pointer rows and the bottom-sheet dialogs were checked with a narrow viewport, not a touch device); `forced-colors` appearance beyond emulation; the social card on a real platform; Windows; real QuickBooks/Xero import, real bank statements and real Vercel/Render/Coolify deployment (as before). The design comparison with shipping accounting products was not done (RESEARCH.md §9.5).
+

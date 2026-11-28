@@ -4,25 +4,25 @@
     {
       "route": "/",
       "jsGzipKB": 168.8,
-      "cssGzipKB": 8.7,
+      "cssGzipKB": 11.5,
       "jsFiles": 5
     },
     {
       "route": "/guides/verify-offline/",
       "jsGzipKB": 168.8,
-      "cssGzipKB": 8.7,
+      "cssGzipKB": 11.5,
       "jsFiles": 5
     },
     {
       "route": "/app/",
       "jsGzipKB": 212,
-      "cssGzipKB": 8.7,
+      "cssGzipKB": 11.5,
       "jsFiles": 8
     }
   ],
   "workbenchLazyJs": {
     "files": 32,
-    "gzipKB": 679.9,
+    "gzipKB": 680.2,
     "largestGzipKB": [
       357.7,
       130.1,
@@ -38,8 +38,8 @@
   },
   "offlineInstall": {
     "files": 44,
-    "rawKB": 4187,
-    "gzipKB": 1395.4,
+    "rawKB": 4202.7,
+    "gzipKB": 1398.4,
     "note": "every file in the build precache list; icons and the manifest add a few KB"
   }
 }

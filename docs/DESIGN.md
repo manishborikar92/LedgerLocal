@@ -91,13 +91,66 @@ Sessions are ephemeral. *Save* writes the project to IndexedDB through `ProjectR
 ## 7. Screen map and states
 `/` landing · `/guides`, `/guides/[slug]` · `/app`: **empty state** → **import queue** (queued, parsing with progress and cancel, password prompt, errors) → **Workbench** (doc tabs, proof strip, PDF pane ↔ grid, toolbar, column guides, notes) · **Merged ledger** · **Payees & rules** · dialogs (Export, Projects, Privacy/verify-offline, Balances, Split, Shortcuts, Samples, Wipe) · **Report** overlay. Offline state: header chip + full function. Phone: Rows/PDF tab switch.
 
-## 8. Visual design system ("calm precision")
-* **Evidence-based direction** (AUDIT.md §2): data-dense tools (Stripe, Linear, Vercel, Mercury) use one workhorse sans with tabular figures, a neutral surface scale, brand colour on a tiny share of pixels, tables as the primary UI, and first-class dark mode. Colour carries meaning, not decoration.
-* **Type**: Geist (variable, self-hosted via `next/font/local`, OFL), `tnum` for every figure; tight tracking on headings (-0.025em), 15 px base in the app, 17–18 px on marketing pages. Geist Mono loads lazily for code and identifiers.
-* **Colour**: neutral cool-grey scale; one indigo accent (`#4338ca` light / `#9aa2ff` dark); semantic success/danger/warning with soft backgrounds. Every text pair ≥ 4.5:1, control borders ≥ 3:1 (axe-verified in both themes).
-* **Shape/depth**: 10 px controls, 16 px cards, hairline borders, two soft shadows; no blur effects (they cost ~20 Lighthouse points under throttling).
-* **Signature**: the *proof strip*: a double-border stamp, a footing with a double-underlined total, ✓/✗ ticks in a ruled margin, and outline styles (solid/dotted/dashed) on the PDF so status never relies on colour alone.
-* **Tokens** in `styles/tokens.css`, exposed to Tailwind via `@theme inline`; component CSS in `@layer components`; layout in utilities.
+## 8. Visual design system ("workpaper")
+Direction written after a first implementation pass, not before it (the tokens were tuned by measurement while the screens were being built); the decisions below are what shipped. Evidence: `docs/RESEARCH.md` §9, `docs/AUDIT.md` §7 (before/after screenshots from `tools/shots.ts`), `docs/DECISIONS.md` D-27 to D-34.
+
+### 8.1 Decision: evolve, do not replace
+The baseline ("calm precision": Geist, cool neutrals, indigo accent) was sound on typography and architecture, and wrong in five places visible in the screenshots: (1) about 300 of 900 px were chrome before the first grid row at 1440×900, and about 600 of 844 at 390; (2) red meant two things (every outflow *and* a discrepancy), and the PDF overlay used green and purple for field kinds, so semantic colours did decorative work; (3) the landing page was the generic SaaS kit (eyebrow chip, gradient wash, window-frame mock, numbered cards, a bento of identical icon tiles) and did not show the audit trail; (4) phones got a four-column grid with a 64 px description column; (5) the dark palette was defined twice. Geist stays (tabular figures, already self-hosted and precached, zero extra bytes); a second display face was rejected (D-29). Everything else was rebuilt on one token set.
+
+### 8.2 Principles
+1. **The proof is the hero.** The verdict (stamp), its arithmetic (a footing: opening + in − out = computed, against printed) and its evidence (the tick margin, the outlined PDF row) appear together on the landing illustration and in the workbench. One form, two places.
+2. **Colour is evidence.** Green = reconciled, red = discrepancy or mismatch, amber = incomplete/assumed, ink-blue = action, selection, focus, links. Nothing else is coloured. Ordinary outflows are ink with a true minus sign (U+2212).
+3. **Figures first.** Tabular lining figures everywhere a number is compared; right-aligned; muted dates and running balances so the amount leads.
+4. **Dense but calm.** 32 px rows for a fine pointer, hairline rules, hover on every row (Carbon), no shadows inside the working surface. Chrome is 48 + 40 px plus a proof bar; panes carry their own toolbars.
+5. **Never colour alone.** Every status has a glyph, a word or a line style as well (✓ ✗ – in the margin, the stamp wording, solid/dotted/heavy/dashed outlines, a 3 px bar on bad rows).
+6. **No decoration that costs.** No blur, no raster images, no gradients; motion only answers an action.
+
+### 8.3 Colour roles (`src/styles/tokens.css`; one `light-dark()` pair per role)
+| Role | Light | Dark | Used for |
+|---|---|---|---|
+| `--bg` / `--surface` / `--bg-subtle` / `--sunken` | #f1f3f5 / #fff / #f6f8fa / #e5e8ed | #0b0e14 / #14171e / #1a1e25 / #07090e | desk, paper (panels, grid), bands and hover, wells and PDF stage |
+| `--text` / `--text-muted` | #111620 / #4d5664 | #e8ebf1 / #a0a8b6 | body, secondary |
+| `--border` / `--border-strong` | #dbdee3 / #707b8d | #292e36 / #6b7587 | decorative hairlines / control outlines |
+| `--accent` (+ hover, fg, soft) | #2253b5 (#144097, #fff, #e7f1ff) | #84b6ff (#a2cdff, #0a0d13, #182846) | primary action, selection, focus, links |
+| `--success` / `--danger` / `--warning` (+ soft) | #00673f / #b7191c / #784900 | #56d298 / #ff847d / #ebc166 | status only |
+| `--paper-ink` / `--paper-grey` / `--paper-danger` | #2253b5 / #4d5664 / #b7191c | same (the PDF page is always white) | outlines drawn on the PDF |
+Authored in OKLCH, shipped as hex. **Measured** (WCAG 2 ratios, `npx tsx tools/check-contrast.ts`, guarded by `tests/unit/design-tokens.test.ts`, 80/80 pairs pass), light / dark: text on surface 18.11 / 15.02; muted on surface 7.42 / 7.49; muted on sunken 6.04 / 8.32 (the tightest text pair); accent on surface 7.06 / 8.64; accent-fg on accent 7.06 / 9.37; success on success-soft 6.20 / 7.77; danger on danger-soft 5.81 / 6.27; warning on warning-soft 6.80 / 8.32; control border on surface 4.28 / 3.86 and on sunken 3.48 / 4.29 (≥ 3 required); paper-ink on paper 7.06, paper-danger 6.63.
+
+### 8.4 Type
+Geist Sans (variable, self-hosted, preloaded) for everything, Geist Mono (lazy) for code, identifiers and the CSP excerpt. Scale: 12 (labels, notes) · 13 (secondary, buttons) · 14 (app body, grid) · 15 (marketing body, dialogs) · 16–17 (stamp figures, dialog titles) · 24–32 (view and start headings) · `clamp(32px, 3.9vw, 50px)` (hero). Headings 640 weight, −0.02em tracking, `text-wrap: balance`. Column headers are sentence case (no letter-spaced capitals); the only uppercase label is the stamp, because it is a stamp. `font-variant-numeric: tabular-nums lining-nums` on every figure.
+
+### 8.5 Space, shape, elevation, density
+4 px base grid (4 8 12 16 24 32 48 64). Radius: 4 (marks), 6 (controls), 10 (panels, dialogs), pill (status chips only), 3 (stamp). Elevation: 0 flat (rules only), 1 raised control, 2 popover/toast/PDF page, 3 modal; there are no shadows in the grid. Density by pointer, not by setting: `--row-h: 32px` for a fine pointer, 44 px for a coarse one (`@media (pointer: coarse)`), 52 px (76 with payee/category) for the two-line layout in a pane narrower than 560 px. The virtual list reads `--row-h` from the stylesheet so rows never overlap or gap (the baseline placed 36 px rows at 34 px intervals).
+
+### 8.6 Iconography
+One in-repo set (`ui/primitives/icons.tsx`): 24-px grid, 1.75 stroke, round caps, `currentColor`, decorative (`aria-hidden`) beside a text label and named by `aria-label` when alone. The mark is an ink-blue tile with ledger rules and a tick. ✓ ✗ – in the audit margin are text glyphs on purpose (tests and screen readers read them).
+
+### 8.7 Motion
+Hover and press feedback 100 ms (colour only). Things that open: dialog and toast 180 ms fade plus 8 px rise via `@starting-style`; the stamp settles once (180 ms scale 1.07→1) when the verdict changes. Nothing loops, scrolls on its own or animates layout. `prefers-reduced-motion` removes all of it. Same-document view transitions are supported at the floor but unused (RESEARCH §9.1).
+
+### 8.8 Components and states
+| Component | Default | Hover | Focus-visible | Active/pressed | Disabled | Error |
+|---|---|---|---|---|---|---|
+| Button (`.btn`, 28/32/44 px; primary, quiet, danger) | surface + strong border | band fill | 2 px accent ring, 2 px offset | sunken fill | 45 % opacity, `not-allowed` | n/a (danger variant is a choice, not a state) |
+| Toggle (`aria-pressed`) | as button | band | ring | accent-soft + accent border | as button | n/a |
+| Input / select | strong border | darker border | ring | n/a | as button | danger border + 3 px danger bar + message under it |
+| Choice tile (radio, `:has(:checked)`) | strong border | band | ring on the tile | accent border + soft fill | n/a | n/a |
+| Tab (underline) / segmented | muted text | text + band | ring | accent underline / soft fill | n/a | n/a |
+| Chip / stamp | tinted by status | chips that are buttons: band | ring | n/a | n/a | the stamp *is* the error form (red, with Δ) |
+| Grid row | surface, hairline | band | active cell: 2 px ring inside the cell | selected: accent-soft + 2 px accent bar; bad: danger tint + 3 px bar + ✗ | n/a | edit input keeps ring, message pinned below the rows |
+| PDF outline | 1 px ink; description dotted, amount 2 px, balance dashed | n/a | n/a | selected: 2.5 px + 16 % fill | n/a | mismatch: danger outline + fill |
+| Dialog | card, 10 px, shadow 3 | n/a | focus moves in, returns on close | n/a | n/a | inline `.note.bad` |
+| Drop zone | dashed strong border | n/a | button inside takes focus | drag-over: solid accent border + soft fill | n/a | n/a |
+
+### 8.9 Layout per breakpoint
+* **≥ 861 px (desktop, landscape tablet).** Top bar 48 px (brand, project, view tabs, status chips, theme, help) → statement strip 40 px (tabs, close, add) → proof bar (stamp · footing · actions · one-line explanation) → split view (PDF left, rows right; the splitter is a focusable window-splitter, 25–75 %, arrows move 3 %, Home/End jump). Each pane is a container: below 760 px the row-tool labels fold into icons (names stay), below 560 px the grid becomes two-line rows.
+* **≤ 860 px (portrait tablet and phone).** One pane at a time behind a Rows/PDF switch; the page scrolls and the 48 px top bar stays; the pane fills the screen below it (`100dvh − bar − switch`). Dialogs become bottom sheets. The proof bar stacks: stamp, footing (each operator stays with the term it leads), actions, note.
+* **≤ 390 px.** Brand name and privacy-chip text collapse (accessible names stay), view tabs move to their own row, row tools fit one line with Export; no horizontal page scroll (E2E-enforced).
+* **Landing.** Hero is text left, the proof illustration right (PDF sheet beside ruled rows, proof above both); below 960 px it stacks; below 640 px the PDF sheet is dropped and the ruled rows remain. Sections are type and hairlines, not cards.
+* **Forced colours.** Selected row, bad row, tabs and controls get `Highlight`/`LinkText` outlines, borders become `CanvasText`.
+
+### 8.10 What is deliberately not here
+Remote fonts or images, blur, gradients, shadows in the data grid, icon tiles, numbered feature cards, testimonials or any metric not measured, a density setting, and any colour that is not one of the roles above.
 
 ## 9. Test plan (what runs, where)
 | Layer | What | Where |

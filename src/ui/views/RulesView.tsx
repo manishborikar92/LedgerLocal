@@ -50,8 +50,8 @@ export function RulesView() {
   const move = (i: number, d: number) => { const a = [...rules]; const j = i + d; if (j < 0 || j >= a.length) return; [a[i], a[j]] = [a[j]!, a[i]!]; replaceRules(a); };
 
   return (
-    <div className="site-container grid gap-4 pb-10 pt-5">
-      <h1 className="display text-3xl">Payees &amp; categories</h1>
+    <div className="page grid gap-4 pb-10 pt-5">
+      <div className="view-head"><h1 className="display">Payees &amp; categories</h1></div>
       <p className="muted m-0 max-w-3xl">Rules run top to bottom; the first match wins. They are saved with the client project and can be exported as JSON to reuse on another client. A small built-in dictionary also tidies bank prefixes and store numbers (“POS PURCHASE NORTHWIND GROCERS #204” → “Northwind Grocers”).</p>
       <div className="grid grid-cols-[repeat(auto-fit,minmax(340px,1fr))] items-start gap-4">
         <RuleEditor draft={draft} setDraft={setDraft} matches={matches} hasDoc={!!doc} isEditing={rules.some((r) => r.id === draft.id)} onSave={() => { saveRule({ ...draft, name: draft.name || draft.match.pattern }); setDraft(blankRule()); }} />
@@ -60,7 +60,7 @@ export function RulesView() {
           {rules.length === 0 ? <p className="muted m-0">No rules yet.</p> : (
             <ol className="m-0 grid list-none gap-1.5 p-0">
               {rules.map((r, i) => (
-                <li key={r.id} className={`flex items-center gap-1.5 rounded-lg border border-line px-2 py-1.5 ${r.enabled ? '' : 'opacity-60'}`}>
+                <li key={r.id} className="rule-item" data-off={!r.enabled}>
                   <input type="checkbox" checked={r.enabled} aria-label={`Enable ${r.name}`} onChange={(e) => saveRule({ ...r, enabled: e.target.checked })} />
                   <div className="min-w-0 flex-1"><strong>{r.name}</strong><div className="muted truncate text-[13px]">{r.match.type} “{r.match.pattern}” → {[r.setPayee, r.setCategory].filter(Boolean).join(' / ')}</div></div>
                   <button className="btn btn-sm" aria-label={`Move ${r.name} up`} onClick={() => move(i, -1)} disabled={i === 0}>↑</button>
